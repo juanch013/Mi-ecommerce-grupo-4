@@ -4,7 +4,7 @@ const Product = (sequelize, DataType)=>{
     
     let cols={
 
-        id:{
+        product_id:{
             type:DataType.INTEGER,
             autoIncrement:true,
             primaryKey: true
@@ -25,7 +25,7 @@ const Product = (sequelize, DataType)=>{
             allowNull:true
         },
 
-        categoria_id:{
+        category_id:{
             type: DataType.INTEGER,
             foreignKey:true
         },
@@ -55,16 +55,16 @@ const Product = (sequelize, DataType)=>{
                 foreignKey:"product_id"
             })
 
-            Product.hasMany(models.Cart,{
+            Product.belongsToMany(models.Cart,{
                 as:"productcart",
-                through:"CartProduct",
+                through:"cart_product",
                 foreignKey:"product_id",
                 otherKey:"cart_id"
             })
 
-            Product.belongsTo(models.Categoria,{
+            Product.belongsTo(models.Category,{
                 as:"productcategoria",
-                foreignKey:"categoria_id"
+                foreignKey:"category_id"
             })
         }
     return Product;
