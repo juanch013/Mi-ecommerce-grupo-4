@@ -2,7 +2,7 @@ const { sequelize } = require(".");
 
 module.exports = (sequelize, DataTypes) => {
     
-    const alias = "cart";
+    const alias = "cart_product";
     const cols ={
         cart_id: {
             type: DataTypes.INTEGER,
@@ -10,35 +10,22 @@ module.exports = (sequelize, DataTypes) => {
             autoIncrement: true,
             allowNule: false
         },
-        user_id:{
+        product_id:{
             type: DataTypes.INTEGER,
-            autoIncrement: true,
             allowNule: false,
-            unique: true,
-            foreignKey: true
-        }
+        },
+        quantity:{
+            type: DataTypes.INTEGER,
+            allowNule: false
+        },
+
     };
     const config = {
         timestamps: true,
         createdAt: true,
         updatedAt: true
     }
-
     const Cart = sequelize.define(alias,cols,config);
-    Cart.associate = (models) => {
-        Cart.belongsTo(models.User, {
-            as: 'usercart',
-            foreignKey: 'user_id'
-        })
-        Cart.belongsToMany(models.Product, {
-            as: "cartproduct",
-            through: 'cart_product',
-            foreignKey: 'cart_id',
-            otherKey: 'product_id'
-
-        })
-
-    }
 
 
 
