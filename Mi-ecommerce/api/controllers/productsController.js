@@ -1,15 +1,30 @@
+const { Op } = require('sequelize');
 const fileHelpers = require('../../helpers/filesHelpers');
+const db = require('../database/models');
 //delvolver todos los mensajes en ingles
 
 const productsController = {
 
     listar: (req, res, next)=>{
         const {category} = req.query
-        let products = fileHelpers.getProducts(next);
+        // let products = fileHelpers.getProducts(next);
 
         if(category){
 
-            products = products.filter((prod)=>{return (prod.category).toLowerCase() == (category).toLowerCase()});
+            let products = db.Product.findAll({
+                where:{
+                    [Op.or]:[
+                        {title:{
+                            [Op.like]:`%${category}%`
+                        }},
+                        {description:{
+                            [Op.like]:`%${category}%`
+                        }}
+                    ]
+                }
+            })
+
+            // products = products.filter((prod)=>{return (prod.category).toLowerCase() == (category).toLowerCase()});
 
             if(products.length == 0){
                 return res.status(404).json({
@@ -17,9 +32,9 @@ const productsController = {
                     msg: "Doesn't exist products with this category"
                 })
             }
-             
+            
             for(prod of products){
-                    prod.gallery = fileHelpers.getPicturesFromProduct(prod.id,next);
+                    // prod.gallery = fileHelpers.getPicturesFromProduct(prod.id,next);
             }
 
             return res.status(200).json({
@@ -29,6 +44,7 @@ const productsController = {
             })
             
         }else{
+
     
             for(prod of products){
                 prod.gallery = fileHelpers.getPicturesFromProduct(prod.id,res,next);
