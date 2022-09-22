@@ -18,14 +18,13 @@ module.exports = (sequelize, DataTypes) => {
 		},
 	};
 
-	// const config = {
-	//   tableName: 'pictures',
-	//   timestamps: false,
-	// createdAt: false,
-	// updatedAt: false,
-	// };
+	const config = {
+	  timestamps: false,
+	createdAt: false,
+	updatedAt: false,
+	};
 
-	const Picture = sequelize.define(alias, cols);
+	const Picture = sequelize.define(alias, cols, config);
 
 	return Picture;
 };
