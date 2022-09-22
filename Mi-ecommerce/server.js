@@ -15,9 +15,8 @@ const swaggerDocument = YAML.load('./swagger.yaml');
 //Middlewares
 const {logErrors,clientErrorHandler} = require('./api/middlewares/errorHandler');
 
-
 const app = express();
-const PORT = 3000; 
+const PORT = 3000;
 
 app.use(express.json());
 
@@ -35,9 +34,7 @@ app.use(logErrors);
 app.use(clientErrorHandler);
 
 
-
-
 app.listen(PORT, () => {
-  sequelize.sync({force: false}) 
+  sequelize.sync({force: true}) 
 	console.log(`Servidor corriendo en el puerto ${PORT}`);
 });

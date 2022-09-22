@@ -1,6 +1,4 @@
-const { sequelize } = require(".");
-
-module.exports = (sequelize, DataTypes) => {
+const CartProduct = (sequelize, DataTypes) => {
     
     const alias = "cart_product";
     const cols ={
@@ -8,15 +6,15 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true,
-            allowNule: false
+            allowNull: false
         },
         product_id:{
             type: DataTypes.INTEGER,
-            allowNule: false,
+            allowNull: false,
         },
         quantity:{
             type: DataTypes.INTEGER,
-            allowNule: false
+            allowNull: false
         },
 
     };
@@ -25,9 +23,8 @@ module.exports = (sequelize, DataTypes) => {
         createdAt: true,
         updatedAt: true
     }
-    const Cart = sequelize.define(alias,cols,config);
-
-
-
-
+    const CartProduct = sequelize.define(alias,cols,config);
+    return CartProduct;
 }
+
+module.exports = CartProduct

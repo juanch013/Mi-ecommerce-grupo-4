@@ -1,19 +1,16 @@
-const { sequelize } = require(".");
-
-module.exports = (sequelize, DataTypes) => {
+const Cart = (sequelize, DataTypes) => {
     
-    const alias = "cart";
+    const alias = "Cart";
     const cols ={
         cart_id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true,
-            allowNule: false
+            allowNull: false
         },
         user_id:{
             type: DataTypes.INTEGER,
-            autoIncrement: true,
-            allowNule: false,
+            allowNull: false,
             unique: true,
             foreignKey: true
         }
@@ -26,21 +23,20 @@ module.exports = (sequelize, DataTypes) => {
 
     const Cart = sequelize.define(alias,cols,config);
     Cart.associate = (models) => {
-        Cart.belongsTo(models.User, {
-            as: 'usercart',
-            foreignKey: 'user_id'
-        })
+
+        // Cart.belongsTo(models.User, {
+        //     as: 'usercart',
+        //     foreignKey: 'user_id'
+        // })
+
         Cart.belongsToMany(models.Product, {
             as: "cartproduct",
             through: 'cart_product',
             foreignKey: 'cart_id',
             otherKey: 'product_id'
-
         })
-
     }
-
-
-
-
+    return Cart;
 }
+
+module.exports = Cart;

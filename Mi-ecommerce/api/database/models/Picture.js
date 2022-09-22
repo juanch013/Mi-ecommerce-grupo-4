@@ -2,26 +2,29 @@ module.exports = (sequelize, DataTypes) => {
 	const alias = 'Picture';
 
 	const cols = {
+
 		picture_id: {
 			type: DataTypes.INTEGER,
 			primaryKey: true,
 			autoIncrement: true,
 			allowNull: false,
 		},
+
 		picture_url: {
 			type: DataTypes.STRING,
 			allowNull: false,
 		},
+
 		picture_description: {
 			type: DataTypes.STRING,
 			allowNull: true,
 		},
-    picture_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      foreignKey: true,
-    },
 
+		product_id: {
+			type: DataTypes.INTEGER,
+			allowNull: false,
+			foreignKey: true,
+		}
 	};
 
 	const config = {

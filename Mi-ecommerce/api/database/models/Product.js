@@ -32,13 +32,13 @@ const Product = (sequelize, DataType)=>{
 
         mostwanted:{
             type: DataType.TINYINT(1),
-            default: 0
+            defaultValue: 0
         },
 
         stock:{
             type: DataType.INTEGER,
             allowNull:false,
-            default:0
+            defaultValue:0
         }
 
     }
@@ -46,7 +46,6 @@ const Product = (sequelize, DataType)=>{
     let conf = {
         timestamps:true
     }
-
 
     const Product = sequelize.define(alias,cols,conf);
         Product.associate = (models)=>{
