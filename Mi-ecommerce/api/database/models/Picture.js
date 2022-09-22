@@ -16,15 +16,28 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.STRING,
 			allowNull: true,
 		},
+    picture_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      foreignKey: true,
+    },
+
 	};
 
 	const config = {
-	  timestamps: false,
-	createdAt: false,
-	updatedAt: false,
+		timestamps: false,
+		createdAt: false,
+		updatedAt: false,
 	};
 
 	const Picture = sequelize.define(alias, cols, config);
+
+  Picture.associate = function(models) {
+    Picture.belongsTo(models.Product, {
+      as: 'product',
+      foreignKey: 'product_id',
+    });
+  }
 
 	return Picture;
 };
