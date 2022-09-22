@@ -2,7 +2,7 @@ module.exports = (sequelize, DataTypes) => {
     const alias = 'User';
     const cols = {
         user_id: {
-            type: DataTypes.BIGINT,
+            type: DataTypes.INTEGER,
 			primaryKey: true,
 			autoIncrement: true,
 			allowNull: false
@@ -43,6 +43,14 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     const User = sequelize.define(alias, cols, config);
+    User.associate = (models)=>{
+
+        User.hasOne(models.Cart, {
+            as: 'usercart',
+            foreignKey: 'user_id'
+        })
+
+    }
     
     return User;
 }
