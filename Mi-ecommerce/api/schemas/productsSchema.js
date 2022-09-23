@@ -1,11 +1,5 @@
 const joi = require('joi');
 
-const id = joi.number().integer().min(1).messages({
-	'number.base': 'Id must be a number',
-	'number.integer': 'Id must be a integer',
-	'number.min': 'Id must be a number greater than 0',
-});
-
 const title = joi.string().min(10).max(150).messages({
 	'string.base': 'Title must be a string',
 	'string.min': 'Title must be at least 10 character long',
@@ -47,21 +41,13 @@ const q = joi.string().min(1).max(50).empty('').messages({
   'string.empty': 'Search is not allowed to be empty', 
 });
 
-const gallery = joi.array().items(joi.number().integer().min(1)).messages({
-	'array.base': 'Gallery must be an array',
-	'number.base': 'Gallery items must be numbers',
-	'number.integer': 'Gallery items must be integers',
-	'number.min': 'Gallery items must be greater than 0',
-});
-
 const createProductSchema = joi.object({
 	title: title.required().messages({ 'any.required': 'Title is required' }),
 	price: price.required().messages({ 'any.required': 'Price is required' }),
 	description: description,
 	category: category,
 	mostwanted: mostwanted,
-	stock: stock,
-	gallery: gallery,
+	stock: stock
 });
 
 const updateProductSchema = joi
@@ -72,7 +58,6 @@ const updateProductSchema = joi
 		category: category,
 		mostwanted: mostwanted,
 		stock: stock,
-		gallery: gallery,
 	})
 	.min(1)
 	.messages({
