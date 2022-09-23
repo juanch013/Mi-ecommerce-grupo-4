@@ -205,7 +205,7 @@ const productsController = {
             })
         }
 
-        let n = db.Product.destroy({
+        let n = await db.Product.destroy({
                     where:{
                         product_id:id
                     }
@@ -297,7 +297,7 @@ const productsController = {
             data: productsFiltrados
         })
     },
-//------------------- hasta aca actualizado a sequelize
+
     modificar: async (req, res, next)=>{
         const {id} = req.params;
 
@@ -310,33 +310,69 @@ const productsController = {
             })
         }
 
-        const {title, description, price, gallery, category, mostwanted, stock} = req.body;
+        const {title, description, price, gallery, category_id, mostwanted, stock} = req.body;
 
-        let products = fileHelpers.getProducts(next);
 
-        if(!products.some((prod)=>{return prod.id == id})){
-            return res.status(404).json({
-                msg:`Doesn't exist a product with id ${id}`
-            })
-        }
+        let prod = await db.Product.findByPk(id);
 
-        let prodModificado = {};
-
-        for(prod of products){
-            if(prod.id == id){
-                prod.title = title == undefined || title == "" ? prod.title : title;
-                prod.description = description == undefined || description == "" ? prod.description : description;
-                prod.price = price == undefined? prod.price : price;
-                prod.stock = stock == undefined? prod.stock : stock;
-                prod.mostwanted = mostwanted == undefined? prod.mostwanted : mostwanted;
-                prod.category = category == undefined? prod.undefined : undefined;
-                prod.gallery = gallery == undefined? prod.gallery : gallery;
-                prodModificado = prod;
-                break;
+        if(category_id != undefined){
+            if(!fileHelpers.existeCat(category_id)){
+                return res.status(400).jason({
+                    error:true,
+                    msg:`category with id = ${category_id} does not exist`
+                })
             }
         }
+
+        let prodModificado = {
+            title: title == undefined? prod.title : title,
+            description: description == undefined? prod.description : description,
+            price : price == undefined? prod.price : price,
+            category_id : category_id == undefined? prod.category_id : category_id,
+            mostwanted: mostwanted == undefined? prod.mostwanted : mostwanted,
+            stock: stock == undefined? prod.stock : stock
+        }
+
+        await db.Product.update(prodModificado,{
+            where:{
+                product_id : id
+            }
+        })
+
+
+        // let n = db.Product.update({
+
+        // },{
+        //     where:{
+
+        //     }
+        // })
+
+        // let products = fileHelpers.getProducts(next);
+
+        // if(!products.some((prod)=>{return prod.id == id})){
+        //     return res.status(404).json({
+        //         msg:`Doesn't exist a product with id ${id}`
+        //     })
+        // }
+
+        // let prodModificado = {};
+
+        // for(prod of products){
+        //     if(prod.id == id){
+        //         prod.title = title == undefined || title == "" ? prod.title : title;
+        //         prod.description = description == undefined || description == "" ? prod.description : description;
+        //         prod.price = price == undefined? prod.price : price;
+        //         prod.stock = stock == undefined? prod.stock : stock;
+        //         prod.mostwanted = mostwanted == undefined? prod.mostwanted : mostwanted;
+        //         prod.category = category == undefined? prod.undefined : undefined;
+        //         prod.gallery = gallery == undefined? prod.gallery : gallery;
+        //         prodModificado = prod;
+        //         break;
+        //     }
+        // }
         
-        fileHelpers.guardarProducts(products, next);
+        // fileHelpers.guardarProducts(products, next);
 
         return res.status(200).json({
             error: false,
@@ -346,65 +382,104 @@ const productsController = {
     },
 
     pictures: async (req, res, next) => {
-      try {
         const { id } = req.params;
 
-        if (
-          req.newUsers.role !== 'admin' &&
-          req.newUsers.role !== 'guest' &&
-          req.newUsers.role !== 'god'
-        ) {
-          return res.status(401).json({ 
-            error: true,
-            msg: 'You are not authorized to access this resource',
-          });
+        try {
+    
+            const productExists = await db.Product.findByPk(id);
+    
+            if (!productExists) {
+                return res.status(404).json({
+                    error: true,
+                    msg: 'Product not found',
+                });
+            }
+    
+            const picturesProduct = await db.Picture.findAll({
+                where: {
+                    product_id: id,
+                },
+            });
+    
+            if (!picturesProduct.length) {
+                return res.status(404).json({
+                    error: true,
+                    msg: 'The product does not have images',
+                });
+            }
+    
+            res.status(200).json({
+                error: false,
+                msg: 'Product photo list',
+                data: picturesProduct,
+            });
+        } catch (error) {
+            next(error);
         }
-    
-        const products = fileHelpers.getProducts(res, next);
-    
-        const productExists = products.find(
-          (product) => product.id === parseInt(id)
-        );
-        if (!productExists) {
-          return res.status(404).json({ error: 'Product not found', message: '' });
-        }
-    
-        // Se lee el arhivo de pictures
-        const pictures = fileHelpers.getImages(next);
-    
-        const picturesProduct = pictures?.filter(
-          (picture) => picture.productId === parseInt(id)
-        );
-    
-        if (!picturesProduct.length) {
-          return res
-            .status(404)
-            .json({ error: 'The product does not have images', message: '' });
-        }
-    
-        res.status(200).json(picturesProduct);
-      } catch (error) {
-        next(error);
-      }
-    },
+    //   try {
+    //     const { id } = req.params;
 
+    //     if (
+    //       req.newUsers.role !== 'admin' &&
+    //       req.newUsers.role !== 'guest' &&
+    //       req.newUsers.role !== 'god'
+    //     ) {
+    //       return res.status(401).json({ 
+    //         error: true,
+    //         msg: 'You are not authorized to access this resource',
+    //       });
+    //     }
+    
+    //     const products = fileHelpers.getProducts(res, next);
+    
+    //     const productExists = products.find(
+    //       (product) => product.id === parseInt(id)
+    //     );
+    //     if (!productExists) {
+    //       return res.status(404).json({ error: 'Product not found', message: '' });
+    //     }
+    
+    //     // Se lee el arhivo de pictures
+    //     const pictures = fileHelpers.getImages(next);
+    
+    //     const picturesProduct = pictures?.filter(
+    //       (picture) => picture.productId === parseInt(id)
+    //     );
+    
+    //     if (!picturesProduct.length) {
+    //       return res
+    //         .status(404)
+    //         .json({ error: 'The product does not have images', message: '' });
+    //     }
+    
+    //     res.status(200).json(picturesProduct);
+    //   } catch (error) {
+    //     next(error);
+    //   }
+    },
+//------------------- hasta aca actualizado a sequelize
     categoria: async (req, res, next)=>{
 
-        let products = fileHelpers.getProducts(next);
         const {category} = req.query;
         
 
-        products = products.filter((prod)=>{return prod.category == category});
+       let products = db.Product.findAll({
+        include:[
+            {
+                association:"productpicture",
+                as:"gallery",
+                where:{
+                    category_name:category
+                }
+            },
+        ]
+       })
 
         if(products.length == 0){
             return res.status(404).json({
                 error:true,
                 msg: "No products found"
             })
-        }
-
-        for(prod of products){
-                prod.gallery = fileHelpers.getPicturesFromProduct(prod.id,next);
         }
 
         return res.status(200).json({
