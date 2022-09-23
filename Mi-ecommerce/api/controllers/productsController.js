@@ -175,8 +175,6 @@ const productsController = {
         const {q} = req.query; 
         
 
-        console.log(q);
-
         let productsFiltrados = await db.Product.findAll({
             where:{
                 [Op.or]:[
@@ -196,6 +194,13 @@ const productsController = {
                 }
             ]
         })
+
+        if (!productsFiltrados.length) {
+          return res.status(404).json({
+            error: true,
+            msg: "Not found products with this search."
+          });
+        }
 
         return res.status(200).json({
             error: false,
