@@ -6,6 +6,7 @@ const usersRoutes = require('./api/routes/usersRoutes');
 const productsRoutes = require('./api/routes/productsRoutes');
 const picturesRoutes = require('./api/routes/picturesRoutes');
 const cartsRoutes = require('./api/routes/cartRoutes');
+const categoryRoutes = require('./api/routes/categoryRoutes');
 const usersController = require('./api/controllers/usersController');
 
 //Swagger
@@ -27,6 +28,7 @@ route.use('/users', usersRoutes);
 route.use('/products', productsRoutes);
 route.use('/pictures', picturesRoutes);
 route.use('/carts', cartsRoutes);
+route.use('/category',categoryRoutes);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
@@ -35,6 +37,6 @@ app.use(clientErrorHandler);
 
 
 app.listen(PORT, () => {
-  sequelize.sync({ force: false }) 
+  sequelize.sync({force:true}); 
 	console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
