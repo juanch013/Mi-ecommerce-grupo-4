@@ -5,6 +5,7 @@ const {
 	guardarPictures,
 } = require('../../helpers/filesHelpers');
 const responses = require('../network/responses');
+const db = require('../database/models')
 
 // /pictures?product=id
 // Acción: Recupera la lista de pictures del product identificado con id. Responde con un array conteniendo las pictures.
@@ -14,24 +15,12 @@ const getPictures = (req, res, next) => {
 	try {
 		const productId = req.query.product;
 
-		console.log(typeof req.newUsers.role);
-		if (
-			req.newUsers.role !== 'admin' &&
-			req.newUsers.role !== 'guest' &&
-			req.newUsers.role !== 'god'
-		) {
-			return res.status(401).json({
-				error: true,
-				msg: 'You are not authorized to access this resource',
-			});
-		}
-
-		const products = getProducts(next);
-
-		const productExists = products.find(
-			(product) => product.id === parseInt(productId)
-		);
-		if (!productExists) {
+		// const products = getProducts(next);
+		// const productExists = products.find(
+		// 	(product) => product.id === parseInt(productId)
+		// );
+		
+    if (!productExists) {
 			return res.status(404).json({
 				error: true,
 				msg: 'Product not found',
@@ -39,12 +28,11 @@ const getPictures = (req, res, next) => {
 		}
 
 		// Se lee el arhivo de pictures
-		const pictures = getImages(next);
+		// const pictures = getImages(next);
+		// const picturesProduct = pictures?.filter(
+		// 	(picture) => picture.productId === parseInt(productId)
+		// );
 
-		console.log(pictures);
-		const picturesProduct = pictures?.filter(
-			(picture) => picture.productId === parseInt(productId)
-		);
 
 		if (!picturesProduct.length) {
 			return res.status(404).json({
@@ -55,7 +43,7 @@ const getPictures = (req, res, next) => {
 
 		res.status(200).json({
 			error: false,
-			msg: 'Listado de imagenes',
+			msg: 'Product photo list',
 			data: picturesProduct,
 		});
 	} catch (error) {
@@ -66,26 +54,11 @@ const getPictures = (req, res, next) => {
 // GET /pictures/:id
 // Acción: Recupera la picture con el id solicitado. Responde con la información completa de la picture con el id buscado.
 // Response codes: 200 OK.// 404 Not Found // 500 Server Error.
-const getPicture = (req, res, next) => {
+const getPicture = async (req, res, next) => {
 	try {
 		const pictureId = req.params.id;
 
-		if (
-			req.newUsers.role !== 'admin' &&
-			req.newUsers.role !== 'guest' &&
-			req.newUsers.role !== 'god'
-		) {
-			return res.status(401).json({
-				error: true,
-				msg: 'You are not authorized to access this resource',
-			});
-		}
-
-		const pictures = getImages(next);
-
-		const picture = pictures?.find(
-			(picture) => picture.id === parseInt(pictureId)
-		);
+    const picture = await db.Picture.findByPk(pictureId)
 
 		if (!picture) {
 			return res.status(404).json({ error: true, msg: 'Picture not found' });
@@ -93,7 +66,7 @@ const getPicture = (req, res, next) => {
 
 		res.status(200).json({
 			error: false,
-			msg: 'listado de imagenes',
+			msg: 'Picture found',
 			data: picture,
 		});
 	} catch (error) {
@@ -108,13 +81,6 @@ const getPicture = (req, res, next) => {
 const createPicture = (req, res, next) => {
 	try {
 		const { pictureUrl, pictureDescription, productId } = req.body;
-
-		if (req.newUsers.role !== 'admin' && req.newUsers.role !== 'god') {
-			return res.status(401).json({
-				error: true,
-				msg: 'You are not authorized to access this resource',
-			});
-		}
 
 		// Se traen los productos del archivo
 		const products = getProducts(next);
@@ -147,7 +113,7 @@ const createPicture = (req, res, next) => {
 
 		res.status(201).json({
 			error: false,
-			msg: 'Imagen agregada correctamente',
+			msg: 'Picture created',
 			data: newPicture,
 		});
 	} catch (error) {
@@ -165,12 +131,6 @@ const updatePicture = (req, res, next) => {
 		const { pictureUrl, pictureDescription } = req.body;
 		const pictureId = req.params.id;
 
-		if (req.newUsers.role !== 'admin' && req.newUsers.role !== 'god') {
-			return res.status(401).json({
-				error: true,
-				msg: 'You are not authorized to access this resource',
-			});
-		}
 		const pictures = getImages(next);
 
 		const picture = pictures.find(
@@ -189,7 +149,7 @@ const updatePicture = (req, res, next) => {
 
 		res.status(200).json({
 			error: false,
-			msg: 'imagen actualizada',
+			msg: 'Picture updated',
 			data: picture,
 		});
 	} catch (error) {
@@ -204,13 +164,6 @@ const updatePicture = (req, res, next) => {
 const deletePicture = (req, res, next) => {
 	try {
 		const pictureId = req.params.id;
-
-		if (req.newUsers.role !== 'admin' && req.newUsers.role !== 'god') {
-			return res.status(401).json({
-				error: true,
-				msg: 'You are not authorized to access this resource',
-			});
-		}
 
 		const pictures = getImages(next);
 

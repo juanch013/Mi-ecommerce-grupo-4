@@ -54,17 +54,17 @@ const Product = (sequelize, DataType)=>{
                 foreignKey:"product_id"
             })
 
-            Product.belongsToMany(models.Cart,{
-                as:"productcart",
-                through:"cart_product",
-                foreignKey:"product_id",
-                otherKey:"cart_id"
-            })
+            // Product.belongsToMany(models.Cart,{
+            //     as:"productcart",
+            //     through:"cart_product",
+            //     foreignKey:"product_id",
+            //     otherKey:"cart_id"
+            // })
 
-            Product.belongsTo(models.Category,{
-                as:"productcategoria",
-                foreignKey:"category_id"
-            })
+            // Product.belongsTo(models.Category,{
+            //     as:"productcategoria",
+            //     foreignKey:"category_id"
+            // })
         }
     return Product;
 }
