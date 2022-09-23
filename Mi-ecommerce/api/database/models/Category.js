@@ -14,7 +14,7 @@ const Category = (sequelize, DataTypes) => {
     } 
 
     const config = {
-        timeStamps: false
+        timestamps: false
     }
 
     const Catergory = sequelize.define(alias,cols,config);
