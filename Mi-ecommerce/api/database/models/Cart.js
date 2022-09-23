@@ -18,9 +18,8 @@ const Cart = (sequelize, DataTypes) => {
         }
     };
         const config = {
-            timestamps: true,
-            createdAt: true,
-            updatedAt: true
+            timestamps: false,
+
         }
 
     const Cart = sequelize.define(alias,cols,config);

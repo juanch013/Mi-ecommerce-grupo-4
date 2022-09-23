@@ -2,7 +2,6 @@ const filesHandler = require('../../helpers/filesHelpers');
 const db = require('../database/models');
 
 
-
 const cartList = async (req,res, next) => {
 try {
     const id = req.params.id;
@@ -13,7 +12,7 @@ try {
             msg: 'Cart not found',
         });
     }
-    const cartUsuario = await db.CartProducts.findAll({
+    const cartUsuario = await db.cart_product.findAll({
         where: {
             cart_id: id
         }
@@ -24,12 +23,76 @@ try {
         data: cartUsuario
     });
 
-} catch (error) {
+    } catch (error) {
     next(error);
+    }
+}
+
+const cartEdit = async (req,res,next) => {
+    try {
+        const id = req.params.id;
+        const newProduct = req.body;
+        const cartExists = await db.Cart.findByPk(id)
+        if(!cartExists){
+            return res.status(404).json({
+                error: true,
+                msg: 'Cart not found',
+            });
+        }
+        const stockProd = await db.Product.findOne({
+            where:{'product_id': newProduct.id},
+            attributes: ['stock']
+        })
+        if(stockProd.dataValues.stock - newProduct.quantity < 0){
+            return res.status(404).json({
+                error: true,
+                msg: 'Not enough stock'
+            })
+        }
+        const productExists = await db.cart_product.findAll({
+            where:{
+                'product_id': newProduct.id,
+                'cart_id': id},
+            attributes: ['product_id']
+        })
+        if(productExists.length == 0){
+            const cartInsert = await db.cart_product.create({
+                cart_id: id,
+                product_id: newProduct.id,
+                quantity: newProduct.quantity
+            })
+        }else{
+            const cartUpdate = await db.cart_product.update({
+                quantity: newProduct.quantity 
+            },{
+                where: {
+                    'product_id': newProduct.id
+                }
+            }
+            )
+        }
+        const cart = await db.cart_product.findAll({
+            where:{
+                'cart_id': id
+            }
+        })
+        res.status(200).json({
+            error: false,
+            msg: 'Success',
+            data: cart
+        })
+    } catch (error) {
+        next(error);
+    }
 }
 
 
 
+
+module.exports = {
+    cartList, 
+    cartEdit
+};
 
 
 
@@ -138,9 +201,3 @@ try {
 //         })
 //     }
 
-}
-
-module.exports = {
-    cartList, 
-    //cartEdit
-};
