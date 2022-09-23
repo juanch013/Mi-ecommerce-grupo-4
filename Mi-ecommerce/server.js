@@ -37,6 +37,6 @@ app.use(clientErrorHandler);
 
 
 app.listen(PORT, () => {
-  sequelize.sync({force:false}); 
+  sequelize.sync({force:true}); 
 	console.log(`Servidor corriendo en el puerto ${PORT}`);
 });

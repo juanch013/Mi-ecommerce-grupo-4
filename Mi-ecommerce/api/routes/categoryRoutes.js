@@ -6,6 +6,6 @@ const validatorHandler = require('../middlewares/validatorHandler');
 	
 router.get('/',categoryController.listCategory);
 router.post('/',categoryController.createCategory);
-router.delete('/:id',categoryController.deleteCategory);
+router.delete('/:id',validatorHandler(idByParamsSchema, 'params'),categoryController.deleteCategory);
 router.put('/:id',validatorHandler(idByParamsSchema, 'params'),categoryController.updateCategory);
 module.exports = router;

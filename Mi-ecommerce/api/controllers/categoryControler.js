@@ -14,6 +14,15 @@ const categoryControler = {
     },
     createCategory:async function(req,res){ 
         try {
+            const categoryExists = await db.Category.findOne({where:{
+                category_name:req.body.name 
+            }});
+            if(categoryExists){
+                    return res.status(400).json({
+                    error:true,
+                    msg: 'Category already exist',
+                });
+            }
             const newcategory =await db.Category.create({
                 category_name:req.body.name
             });
