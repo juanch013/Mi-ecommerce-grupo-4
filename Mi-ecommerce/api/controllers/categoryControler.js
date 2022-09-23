@@ -2,31 +2,80 @@ const db = require('../database/models');
 const categoryControler = {
     listCategory: async function(req,res){
         const allcategorys= await db.Category.findAll();
-        res.send(allcategorys);       
+        try {
+            res.status(200).json({
+                error:false,
+                msg: "Category List",
+                data:allcategorys
+            });   
+        } catch (error) {
+            next(error);  
+        }
     },
     createCategory:async function(req,res){ 
-        const a =await db.Category.create({
-            category_name:req.body.name
-        });
-        res.send(a);
+        try {
+            const newcategory =await db.Category.create({
+                category_name:req.body.name
+            });
+            res.status(200).json({
+                error:false,
+                msg: "Se creo la categoria",
+                data:newcategory
+            });
+        } catch (error) {
+            next(error)
+        }
     },
     deleteCategory:async function(req,res){
-        await db.Category.destroy({
-            where:{
-                category_id:req.params.id
+        try {
+            const categoryId = req.params.id;
+            const categoryExists = await db.Category.findByPk(categoryId);
+            if(!categoryExists){
+                return res.status(404).json({
+                    error:true,
+                    msg: 'Category not found',
+                });
             }
-        });
-        res.send("se destruyo " + req.params.id);
+            const catDelete=await db.Category.destroy({
+                where:{
+                    category_id:categoryId
+                }
+            });
+            res.status(200).json({
+                error:false,
+                msg:"Category delete",
+                data:categoryExists
+            });
+        } catch (error) {
+            next(error)
+        }
     },
     updateCategory: async function(req,res){
-        await db.Category.update({
-            category_name:req.body.name
-        },{
-            where:{
-                category_id:req.params.id
-            }
-        });
-        res.send("se actualizo " + req.params.id);
+        try {
+            const categoryId = req.params.id;
+            const categoryExists = await db.Category.findByPk(categoryId);
+                if(!categoryExists){
+                    return res.status(404).json({
+                        error:true,
+                        msg: 'Category not found',
+                    });
+
+                }
+            await db.Category.update({
+                category_name:req.body.name
+            },{
+                where:{
+                    category_id:categoryId
+                }
+            });
+            res.status(200).json({
+                error:false,
+                msg:"Category update",
+                data:categoryExists
+            });
+        } catch (error) {
+            next(error)
+        }
     }
 }
 
