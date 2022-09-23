@@ -21,30 +21,30 @@ const Product = (sequelize, DataType)=>{
         },
 
         description:{
-            type: DataType.STRING,
+            type: DataType.TEXT,
             allowNull:true
         },
 
         category_id:{
             type: DataType.INTEGER,
-            foreignKey:true
+            // foreignKey:true
         },
 
         mostwanted:{
             type: DataType.TINYINT(1),
-            defaultValue: 0
+            defaultValue: 0,
         },
 
         stock:{
             type: DataType.INTEGER,
-            allowNull:false,
+            allowNull:true,
             defaultValue:0
         }
 
     }
 
     let conf = {
-        timestamps:true
+        timestamps: false
     }
 
     const Product = sequelize.define(alias,cols,conf);
