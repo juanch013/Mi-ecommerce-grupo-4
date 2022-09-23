@@ -16,7 +16,7 @@ const Product = (sequelize, DataType)=>{
         },
 
         price:{
-            type: DataType.INTEGER,
+            type: DataType.DECIMAL(4,1),
             allowNull:false
         },
 
@@ -49,9 +49,11 @@ const Product = (sequelize, DataType)=>{
 
     const Product = sequelize.define(alias,cols,conf);
         Product.associate = (models)=>{
+
             Product.hasMany(models.Picture,{
                 as:"productpicture",
-                foreignKey:"product_id"
+                foreignKey:"product_id",
+                onDelete:"CASCADE"
             })
 
             Product.belongsToMany(models.Cart,{
