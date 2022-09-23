@@ -17,6 +17,16 @@ const categoryControler = {
             }
         });
         res.send("se destruyo " + req.params.id);
+    },
+    updateCategory: async function(req,res){
+        await db.Category.update({
+            category_name:req.body.name
+        },{
+            where:{
+                category_id:req.params.id
+            }
+        });
+        res.send("se actualizo " + req.params.id);
     }
 }
 
