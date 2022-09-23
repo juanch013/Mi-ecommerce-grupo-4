@@ -39,8 +39,17 @@ const cartEdit = async (req,res,next) => {
                 msg: 'Cart not found',
             });
         }
+
+        const productExists = await db.Product.findByPk(newProduct.id)
+        if(!productExists){
+            return res.status(404).json({
+                error: true,
+                msg: 'Product not found',
+            });
+        }
+
         const stockProd = await db.Product.findOne({
-            where:{'product_id': newProduct.id},
+            where:{product_id: newProduct.id},
             attributes: ['stock']
         })
         if(stockProd.dataValues.stock - newProduct.quantity < 0){
@@ -49,28 +58,39 @@ const cartEdit = async (req,res,next) => {
                 msg: 'Not enough stock'
             })
         }
-        const productExists = await db.cart_product.findAll({
-            where:{
-                'product_id': newProduct.id,
-                'cart_id': id},
-            attributes: ['product_id']
+
+        const actualizar = await db.cart_product.upsert({
+            product_id: newProduct.id,
+            cart_id: id,
+            quantity: newProduct.quantity
         })
-        if(productExists.length == 0){
-            const cartInsert = await db.cart_product.create({
-                cart_id: id,
-                product_id: newProduct.id,
-                quantity: newProduct.quantity
-            })
-        }else{
-            const cartUpdate = await db.cart_product.update({
-                quantity: newProduct.quantity 
-            },{
-                where: {
-                    'product_id': newProduct.id
-                }
-            }
-            )
-        }
+
+
+
+
+        // const inCart = await db.cart_product.findOne({
+        //     where:{
+        //         'product_id': newProduct.id,
+        //         'cart_id': id},
+        //     attributes: ['product_id']
+        // })
+        // if(!inCart){
+        //     const cartInsert = await db.cart_product.create({
+        //         cart_id: id,
+        //         product_id: newProduct.id,
+        //         quantity: newProduct.quantity
+        //     })
+        // }else{
+        //     const cartUpdate = await db.cart_product.update({
+        //         quantity: newProduct.quantity 
+        //     },{
+        //         where: {
+        //             'product_id': newProduct.id
+        //         }
+        //     }
+        //     )
+        // }
+
         const cart = await db.cart_product.findAll({
             where:{
                 'cart_id': id
