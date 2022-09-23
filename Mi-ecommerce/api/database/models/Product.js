@@ -21,30 +21,30 @@ const Product = (sequelize, DataType)=>{
         },
 
         description:{
-            type: DataType.STRING,
+            type: DataType.TEXT,
             allowNull:true
         },
 
         category_id:{
             type: DataType.INTEGER,
-            foreignKey:true
+            // foreignKey:true
         },
 
         mostwanted:{
             type: DataType.TINYINT(1),
-            defaultValue: 0
+            defaultValue: 0,
         },
 
         stock:{
             type: DataType.INTEGER,
-            allowNull:false,
+            allowNull:true,
             defaultValue:0
         }
 
     }
 
     let conf = {
-        timestamps:true
+        timestamps: false
     }
 
     const Product = sequelize.define(alias,cols,conf);
@@ -54,17 +54,17 @@ const Product = (sequelize, DataType)=>{
                 foreignKey:"product_id"
             })
 
-            // Product.belongsToMany(models.Cart,{
-            //     as:"productcart",
-            //     through:"cart_product",
-            //     foreignKey:"product_id",
-            //     otherKey:"cart_id"
-            // })
+            Product.belongsToMany(models.Cart,{
+                as:"productcart",
+                through:"cart_product",
+                foreignKey:"product_id",
+                otherKey:"cart_id"
+            })
 
-            // Product.belongsTo(models.Category,{
-            //     as:"productcategoria",
-            //     foreignKey:"category_id"
-            // })
+            Product.belongsTo(models.Category,{
+                as:"productcategoria",
+                foreignKey:"category_id"
+            })
         }
     return Product;
 }

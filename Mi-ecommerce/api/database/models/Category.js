@@ -10,11 +10,12 @@ const Category = (sequelize, DataTypes) => {
 
         category_name:{
             type:DataTypes.STRING,
+            allowNull: false,
         }
     } 
 
     const config = {
-        timeStamps: false
+        timestamps: false
     }
 
     const Catergory = sequelize.define(alias,cols,config);

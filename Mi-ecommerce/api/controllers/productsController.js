@@ -1,7 +1,7 @@
 const { Op } = require('sequelize');
 const fileHelpers = require('../../helpers/filesHelpers');
 const db = require('../database/models');
-//delvolver todos los mensajes en ingles
+
 
 const productsController = {
 

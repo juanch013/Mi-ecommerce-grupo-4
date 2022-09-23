@@ -5,34 +5,30 @@ const {
 	guardarPictures,
 } = require('../../helpers/filesHelpers');
 const responses = require('../network/responses');
-const db = require('../database/models')
+const db = require('../database/models');
 
 // /pictures?product=id
 // Acción: Recupera la lista de pictures del product identificado con id. Responde con un array conteniendo las pictures.
 // Response codes: // 200 OK.// 404 Not Found // 500 Server Error.
 // POR QUERY VIENEN COMO STRING!
-const getPictures = (req, res, next) => {
+const getPictures = async (req, res, next) => {
 	try {
 		const productId = req.query.product;
 
-		// const products = getProducts(next);
-		// const productExists = products.find(
-		// 	(product) => product.id === parseInt(productId)
-		// );
-		
-    if (!productExists) {
+		const productExists = await db.Product.findByPk(productId);
+
+		if (!productExists) {
 			return res.status(404).json({
 				error: true,
 				msg: 'Product not found',
 			});
 		}
 
-		// Se lee el arhivo de pictures
-		// const pictures = getImages(next);
-		// const picturesProduct = pictures?.filter(
-		// 	(picture) => picture.productId === parseInt(productId)
-		// );
-
+		const picturesProduct = await db.Picture.findAll({
+			where: {
+				product_id: productId,
+			},
+		});
 
 		if (!picturesProduct.length) {
 			return res.status(404).json({
@@ -58,7 +54,7 @@ const getPicture = async (req, res, next) => {
 	try {
 		const pictureId = req.params.id;
 
-    const picture = await db.Picture.findByPk(pictureId)
+		const picture = await db.Picture.findByPk(pictureId);
 
 		if (!picture) {
 			return res.status(404).json({ error: true, msg: 'Picture not found' });
@@ -78,38 +74,21 @@ const getPicture = async (req, res, next) => {
 // Acción: Crea una nueva picture. Debe recibir un body con la info de la picture a crear.
 // Responde con la info completa de la nueva picture.
 // Response codes: // 201 Created.//400 Bad Request // 500 Server Error.
-const createPicture = (req, res, next) => {
+const createPicture = async (req, res, next) => {
 	try {
 		const { pictureUrl, pictureDescription, productId } = req.body;
 
-		// Se traen los productos del archivo
-		const products = getProducts(next);
+		const productExist = await db.Product.findByPk(productId);
 
-		const product = products.find(
-			(product) => product.id === parseInt(productId)
-		);
-
-		if (!product) {
+		if (!productExist) {
 			return res.status(404).json({ error: true, msg: 'Product not found' });
 		}
 
-		// Se traen las pictures del archivo
-		const pictures = getImages(next);
-
-		// Se calcula el id de la nueva picture
-		const pictureId = pictures.at(-1).id + 1;
-
-		const newPicture = {
-			id: pictureId,
-			url: pictureUrl,
-			description: pictureDescription,
-			productId,
-		};
-
-		pictures.push(newPicture);
-
-		// Se escribe en el archivo la nueva picture
-		guardarPictures(pictures, next);
+		const newPicture = await db.Picture.create({
+			picture_url: pictureUrl,
+			picture_description: pictureDescription,
+			product_id: productId,
+		});
 
 		res.status(201).json({
 			error: false,
@@ -126,31 +105,35 @@ const createPicture = (req, res, next) => {
 // Responde con la info completa de la picture modificada.
 // Response codes: // 200 OK. // 400 Bad Request // 404 Not Found (si no existe la picture con el id solicitado)
 // 500 Server Error.
-const updatePicture = (req, res, next) => {
+const updatePicture = async (req, res, next) => {
 	try {
 		const { pictureUrl, pictureDescription } = req.body;
 		const pictureId = req.params.id;
 
-		const pictures = getImages(next);
-
-		const picture = pictures.find(
-			(picture) => picture.id === parseInt(pictureId)
-		);
+		const picture = await db.Picture.findByPk(pictureId);
 
 		if (!picture) {
 			return res.status(404).json({ error: true, msg: 'Picture not found' });
 		}
 
-		picture.url = pictureUrl;
-		picture.description = pictureDescription;
+		let pictureUpdate = await db.Picture.update(
+			{
+				picture_url: pictureUrl,
+				picture_description: pictureDescription,
+			},
+			{
+				where: {
+					picture_id: pictureId,
+				},
+			}
+		);
 
-		// Se escribe en el archivo la nueva picture
-		guardarPictures(pictures, next);
+		pictureUpdate = await db.Picture.findByPk(pictureId);
 
 		res.status(200).json({
 			error: false,
 			msg: 'Picture updated',
-			data: picture,
+			data: pictureUpdate,
 		});
 	} catch (error) {
 		next(error);
@@ -161,29 +144,25 @@ const updatePicture = (req, res, next) => {
 // Acción: Eliminar la picture identificada con id. Responde con información sobre la eliminación realizada.
 // Response codes:
 // 200 OK. // 404 Not Found (si no existe la picture con el id solicitado) // 500 Server Error.
-const deletePicture = (req, res, next) => {
+const deletePicture = async (req, res, next) => {
 	try {
 		const pictureId = req.params.id;
 
-		const pictures = getImages(next);
+		const pictureExist = await db.Picture.findByPk(pictureId);
 
-		const picture = pictures.find(
-			(picture) => picture.id === parseInt(pictureId)
-		);
-
-		if (!picture) {
+		if (!pictureExist) {
 			return res.status(404).json({ error: true, msg: 'Picture not found' });
 		}
 
-		const index = pictures.indexOf(picture);
-		pictures.splice(index, 1);
-
-		// Se borra la picture del archivo
-		guardarPictures(pictures, next);
+		await db.Picture.destroy({
+			where: {
+				picture_id: pictureId,
+			},
+		});
 
 		res
 			.status(200)
-			.json({ error: false, msg: 'Picture deleted', data: picture });
+			.json({ error: false, msg: 'Picture deleted', data: pictureExist });
 	} catch (error) {
 		next(error);
 	}
