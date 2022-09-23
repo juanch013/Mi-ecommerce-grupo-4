@@ -5,6 +5,6 @@ const {verifyJWT} = require('../middlewares/verifyJWT');
 const router = express.Router();
 router.use(verifyJWT)
 router.get('/:id', cartList);
-router.put('/:id', cartEdit);
+//router.put('/:id', cartEdit);
 
 module.exports = router;
