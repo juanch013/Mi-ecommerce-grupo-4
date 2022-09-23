@@ -10,6 +10,7 @@ const Category = (sequelize, DataTypes) => {
 
         category_name:{
             type:DataTypes.STRING,
+            allowNull: false,
         }
     } 
 

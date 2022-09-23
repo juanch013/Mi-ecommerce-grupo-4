@@ -29,8 +29,8 @@ module.exports = (sequelize, DataTypes) => {
 
 	const config = {
 		timestamps: false,
-		createdAt: false,
-		updatedAt: false,
+		// createdAt: false,
+		// updatedAt: false,
 	};
 
 	const Picture = sequelize.define(alias, cols, config);

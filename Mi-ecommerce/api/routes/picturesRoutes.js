@@ -12,11 +12,12 @@ const {
 	createSchema,
 	updateSchema,
 } = require('../schemas/picturesSchema');
-const {idByParamsSchema} = require('../schemas/genericSchema');
+const { idByParamsSchema } = require('../schemas/genericSchema');
 
 // Middlewares
 const { verifyJWT } = require('../middlewares/verifyJWT');
 const validatorHandler = require('../middlewares/validatorHandler');
+const rolVerification = require('../middlewares/rolVerification');
 
 const router = express.Router();
 
@@ -24,33 +25,38 @@ router.use(verifyJWT);
 
 router.get(
 	'/',
+	rolVerification.generic,
 	validatorHandler(getProductPicturesSchema, 'query'),
 	getPictures
 );
 
-router.get('/ruta-prueba', async (req, res) => {
-	try {
-		const createPicture = await db.Picture.create({
-			picture_url: 'https://www.google.com',
-		});
-		res.send('Picture Creada');
-	} catch (err) {
-		console.log('Err', err);
-		res.send('Completa todos los datos requeridos');
-	}
-});
+router.get(
+	'/:id',
+	rolVerification.generic,
+	validatorHandler(idByParamsSchema, 'params'),
+	getPicture
+);
 
-router.get('/:id', validatorHandler(idByParamsSchema, 'params'), getPicture);
-
-router.post('/', validatorHandler(createSchema, 'body'), createPicture);
+router.post(
+	'/',
+	rolVerification.admin,
+	validatorHandler(createSchema, 'body'),
+	createPicture
+);
 
 router.put(
 	'/:id',
+  rolVerification.admin,
 	validatorHandler(idByParamsSchema, 'params'),
 	validatorHandler(updateSchema, 'body'),
 	updatePicture
 );
 
-router.delete('/:id', validatorHandler(idByParamsSchema, 'params'), deletePicture);
+router.delete(
+	'/:id',
+  rolVerification.admin,
+	validatorHandler(idByParamsSchema, 'params'),
+	deletePicture
+);
 
 module.exports = router;
