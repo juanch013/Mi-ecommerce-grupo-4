@@ -7,13 +7,16 @@ const {
 	createProductSchema,
 	searchProductSchema,
 	updateProductSchema,
+  categoryPoductSchema
 } = require('../schemas/productsSchema');
 const { idByParamsSchema } = require('../schemas/genericSchema');
 const validatorHandler = require('../middlewares/validatorHandler');
 
 router.use(verifyJWT);
 
-router.get('/', productsController.listar);
+router.get('/', 
+validatorHandler(categoryPoductSchema,'query'),
+productsController.listar);
 
 router.get('/mostwanted', productsController.mostwanted);
 
