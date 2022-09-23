@@ -14,14 +14,7 @@ const productsController = {
 
             let products = await db.Product.findAll({
                 where:{
-                    [Op.or]:[
-                        {title:{
-                            [Op.like]:`%${category}%`
-                        }},
-                        {description:{
-                            [Op.like]:`%${category}%`
-                        }}
-                    ]
+                    category_id:category
                 },
 
                 include:[
@@ -200,7 +193,7 @@ const productsController = {
          })
 
     },
-    //------------------- hasta aca actualizado a sequelize
+    
     eliminar: async (req, res, next)=>{
         const {id} = req.params;
         const rol = req.newUsers.role;
@@ -224,6 +217,7 @@ const productsController = {
                         msg:"Product not found"
                     })
         }
+
 
         return res.status(200).json({
                     error: false,
@@ -252,9 +246,7 @@ const productsController = {
 
     busqueda: async (req, res, next)=>{
         // let products = fileHelpers.getProducts(next);
-        const q = req.query.q;
-        return res.send(q);
-        let productsFiltrados = [] 
+        const {q} = req.query; 
         
         //aca recorro el array de productos y voy pusheando a 'productsFiltrados' los elementos
         //que contengan la keyword del query string
@@ -277,34 +269,35 @@ const productsController = {
         //     })
         // }
 
-        // productsFiltrados = await db.Product.findAll({
-        //     where:{
-        //         [Op.or]:[
-        //             {title:{
-        //                 [Op.like]:`%${q}%`
-        //             }},
-        //             {description:{
-        //                 [Op.like]:`%${q}%`
-        //             }}
-        //         ]
-        //     },
+        console.log(q);
 
-        //     include:[
-        //         {
-        //             association:"productpicture",
-        //             as:"gallery",
-        //             through:[{atributes:[]}]
-        //         }
-        //     ]
-        // })
+        let productsFiltrados = await db.Product.findAll({
+            where:{
+                [Op.or]:[
+                    {title:{
+                        [Op.like]:`%${q}%`
+                    }},
+                    {description:{
+                        [Op.like]:`%${q}%`
+                    }}
+                ]
+            },
 
-        // return res.status(200).json({
-        //     error: false,
-        //     msg:"Products filtered",
-        //     data: productsFiltrados
-        // })
+            include:[
+                {
+                    association:"productpicture",
+                    as:"gallery"
+                }
+            ]
+        })
+
+        return res.status(200).json({
+            error: false,
+            msg:"Products filtered",
+            data: productsFiltrados
+        })
     },
-
+//------------------- hasta aca actualizado a sequelize
     modificar: async (req, res, next)=>{
         const {id} = req.params;
 
