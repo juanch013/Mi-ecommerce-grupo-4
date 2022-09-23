@@ -1,4 +1,5 @@
 const fs = require('fs');
+const db = require('../api/database/models');
 
 //retorna un array de objetos literales con los productos del sistema
 const getProducts = (next) => {
@@ -92,6 +93,17 @@ const eliminarPicturesDeProduct = (id, next) => {
 	}
 };
 
+//se le pasa un id de categoria y si existe devuelve true sino false
+const existeCat = (id)=>{
+	let cat = db.Category.findByPk(id);
+
+	if(cat){
+		return true;
+	}
+
+	return false;
+}
+
 module.exports = {
 	getProducts,
 	getUsers,
@@ -102,4 +114,5 @@ module.exports = {
 	guardarUsers,
 	eliminarPicturesDeProduct,
 	ordenarProductos,
+	existeCat
 };
