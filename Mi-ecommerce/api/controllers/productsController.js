@@ -13,14 +13,13 @@ const productsController = {
         if(category){
 
             let products = await db.Product.findAll({
-                where:{
-                    category_id:category
-                },
-
                 include:[
                     {
-                        association:"productpicture",
-                        as:"gallery"
+                        association:"productcategoria",
+                        attributes:{exclude:['category_id','category_name']},
+                        where:{
+                            category_name:category
+                        },
                     }
                 ]
             })
@@ -49,7 +48,7 @@ const productsController = {
             let products = await db.Product.findAll({
                 include:[
                     {
-                        association:"productpicture",
+                        association:"gallery",
                         as:"gallery"
                     }
                 ]
@@ -75,7 +74,7 @@ const productsController = {
         let prod = await db.Product.findByPk(id,{
             include:[
                 {
-                    association:"productpicture",
+                    association:"gallery",
                     as:"gallery"
                 }
             ]
@@ -129,7 +128,7 @@ const productsController = {
             },
             include:[
                 {
-                    association:"productpicture",
+                    association:"gallery",
                     as:"gallery"
                 }
             ]
@@ -285,7 +284,7 @@ const productsController = {
 
             include:[
                 {
-                    association:"productpicture",
+                    association:"gallery",
                     as:"gallery"
                 }
             ]
@@ -466,8 +465,8 @@ const productsController = {
        let products = db.Product.findAll({
         include:[
             {
-                association:"productpicture",
-                as:"gallery",
+                association:"gallery",
+
                 where:{
                     category_name:category
                 }

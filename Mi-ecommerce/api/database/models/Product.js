@@ -51,7 +51,7 @@ const Product = (sequelize, DataType)=>{
         Product.associate = (models)=>{
 
             Product.hasMany(models.Picture,{
-                as:"productpicture",
+                as:"gallery",
                 foreignKey:"product_id",
                 onDelete:"CASCADE"
             })
