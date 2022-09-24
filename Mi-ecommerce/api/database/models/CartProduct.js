@@ -16,12 +16,17 @@ const CartProduct = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false
         },
+        createdAt:{
+            type: DataTypes.DATE
+        },
+        updatedAt:{
+            type: DataTypes.DATE
+        }
 
     };
     const config = {
-        timestamps: false,
-        createdAt: false,
-        updatedAt: false
+        timestamps: true,
+
     }
     const CartProduct = sequelize.define(alias,cols,config);
     return CartProduct;
