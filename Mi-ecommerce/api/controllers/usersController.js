@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const fileHelpers = require('../../helpers/filesHelpers');
 const {generateJWT} = require('../../helpers/generateJWT');
+const db = require('../database/models');
 
 
 //Recibe array de usuarios y un id de usuario. 
@@ -17,21 +18,32 @@ const findUserById = (users, id) => {
 }
 
 // Filters out password field from user object so it's not returned
-const getUserWithoutPassword = (user) => {
-    const {id, email, username, firstname, lastname, role, profilepic, cart} = user;
-    return {id, email, username, firstname, lastname, role, profilepic, cart};
-}
+// const getUserWithoutPassword = (user) => {
+//     const {id, email, username, firstname, lastname, role, profilepic, cart} = user;
+//     return {id, email, username, firstname, lastname, role, profilepic, cart};
+// }
 
 const usersController = {
-    listUsers: function(req, res, next) {
-        const users = fileHelpers.getUsers(next);
-        const usersWithoutPassword = users.map((user) => {
-             return getUserWithoutPassword(user);
-        })
-        res.status(200).send({
-            error: false,
-            msg: 'Users list',  
-            data: usersWithoutPassword});
+    listUsers: async function(req, res, next) {
+
+        try {
+            let users = await db.User.findAll(
+                {
+                    attributes: ['user_id', 'first_name', 'last_name', 'username', 'email', 'role', 'profilepic']
+                }
+            );
+            return res.status(200).send({
+                error: false,
+                msg: 'Users list',  
+                data: users
+            });
+        } catch (error) {
+            return res.status(500).send({
+                error: true,
+                msg: 'Server error',
+                data: error
+            });
+        }
     }, 
 
     getUser: function(req, res, next) {

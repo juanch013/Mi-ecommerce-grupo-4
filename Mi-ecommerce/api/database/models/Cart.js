@@ -2,12 +2,14 @@ const Cart = (sequelize, DataTypes) => {
     
     const alias = "Cart";
     const cols ={
+        
         cart_id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true,
             allowNull: false
         },
+
         user_id:{
             type: DataTypes.INTEGER,
             allowNull: false,
@@ -15,16 +17,18 @@ const Cart = (sequelize, DataTypes) => {
             foreignKey: true
         }
     };
-    const config = {
-        timestamps: true,
-        createdAt: true,
-        updatedAt: true
-    }
+        const config = {
+            timestamps: false,
+
+        }
 
     const Cart = sequelize.define(alias,cols,config);
     Cart.associate = (models) => {
 
-        Cart.belongsTo(models.User)
+        Cart.belongsTo(models.User,{
+            as:"cartuser",
+            foreignKey:"user_id"
+        })
 
         Cart.belongsToMany(models.Product, {
             as: "cartproduct",
