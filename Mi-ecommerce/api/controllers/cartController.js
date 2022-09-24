@@ -3,35 +3,10 @@ const db = require('../database/models');
 
 
 const cartList = async (req,res, next) => {
-try {
-    const id = req.params.id;
-    const cartExists = await db.Cart.findByPk(id)
-    if(!cartExists){
-        return res.status(404).json({
-            error: true,
-            msg: 'Cart not found',
-        });
-    }
-    const cartUsuario = await db.cart_product.findAll({
-        where: {
-            cart_id: id
-        }
-    })
-    return res.status(200).json({
-        error: false,
-        msg: 'User cart:',
-        data: cartUsuario
-    });
-
-    } catch (error) {
-    next(error);
-    }
-}
-
-const cartEdit = async (req,res,next) => {
+const role= req.newUsers.role;
+const id = req.params.id
+if(req.newUsers.id === Number(id) || role === 'god' || role === 'admin'){
     try {
-        const id = req.params.id;
-        const newProduct = req.body;
         const cartExists = await db.Cart.findByPk(id)
         if(!cartExists){
             return res.status(404).json({
@@ -39,34 +14,100 @@ const cartEdit = async (req,res,next) => {
                 msg: 'Cart not found',
             });
         }
-
-        const productExists = await db.Product.findByPk(newProduct.id)
-        if(!productExists){
-            return res.status(404).json({
-                error: true,
-                msg: 'Product not found',
-            });
-        }
-
-        const stockProd = await db.Product.findOne({
-            where:{product_id: newProduct.id},
-            attributes: ['stock']
+        const cartUsuario = await db.cart_product.findAll({
+            where: {
+                cart_id: id
+            }
         })
-        if(stockProd.dataValues.stock - newProduct.quantity < 0){
-            return res.status(404).json({
-                error: true,
-                msg: 'Not enough stock'
+        return res.status(200).json({
+            error: false,
+            msg: 'User cart:',
+            data: cartUsuario
+        });
+
+        } catch (error) {
+        next(error);
+        }
+    }else{
+        return res.status(403).json({
+            error: true,
+            msg: 'Forbidden'
+        })
+    }
+}
+
+
+
+const cartEdit = async (req,res,next) => {
+    const role= req.newUsers.role;
+    const id = req.params.id;
+    if(req.newUsers.id === Number(id) || role === 'god'){
+        try {
+            const newProduct = req.body;
+            const cartExists = await db.Cart.findByPk(id)
+            if(!cartExists){
+                return res.status(404).json({
+                    error: true,
+                    msg: 'Cart not found',
+                });
+            }
+
+            const productExists = await db.Product.findByPk(newProduct.id)
+            if(!productExists){
+                return res.status(404).json({
+                    error: true,
+                    msg: 'Product not found',
+                });
+            }
+
+            const stockProd = await db.Product.findOne({
+                where:{product_id: newProduct.id},
+                attributes: ['stock']
             })
-        }
-
-        const actualizar = await db.cart_product.upsert({
-            product_id: newProduct.id,
-            cart_id: id,
-            quantity: newProduct.quantity
+            if(stockProd.dataValues.stock - newProduct.quantity < 0){
+                return res.status(404).json({
+                    error: true,
+                    msg: 'Not enough stock'
+                })
+            }
+                const cartUpdate = await db.cart_product.upsert({
+                    product_id: newProduct.id,
+                    cart_id: id,
+                    quantity: newProduct.quantity
+            })
+                const cart = await db.cart_product.findAll({
+                    where:{
+                        'cart_id': id
+                    }
+                })
+                res.status(200).json({
+                    error: false,
+                    msg: 'Success',
+                    data: cart
+                })
+            } catch (error) {
+                next(error);
+            }
+    }
+    else{
+        return res.status(403).json({
+            error: true,
+            msg: 'Forbidden'
         })
+    } 
+
+}
 
 
 
+module.exports = {
+    cartList, 
+    cartEdit
+};
+
+
+
+        
 
         // const inCart = await db.cart_product.findOne({
         //     where:{
@@ -91,28 +132,6 @@ const cartEdit = async (req,res,next) => {
         //     )
         // }
 
-        const cart = await db.cart_product.findAll({
-            where:{
-                'cart_id': id
-            }
-        })
-        res.status(200).json({
-            error: false,
-            msg: 'Success',
-            data: cart
-        })
-    } catch (error) {
-        next(error);
-    }
-}
-
-
-
-
-module.exports = {
-    cartList, 
-    cartEdit
-};
 
 
 
