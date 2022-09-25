@@ -121,16 +121,21 @@ const productsController = {
             })
         }
 
-        const newProduct = {
-            title: title,
-            description: description,
-            price: price == undefined? 0 : price,
-            stock: stock == undefined? 0 : stock,
-            mostwanted:mostwanted == undefined? 0 : mostwanted,
-            category_id:category
-        }
+        const newProduct = await db.Product.create({
+          title: title,
+          description: description,
+          price: price == undefined? 0 : price,
+          stock: stock == undefined? 0 : stock,
+          mostwanted:mostwanted == undefined? 0 : mostwanted,
+          category_id:category
+        });
 
-        db.Product.create(newProduct);
+        if (!newProduct) {
+          return res.status(400).json({
+            error: true,
+            msg: "Error creating product",
+          });
+        }
 
          return res.status(201).json({
              error:false,
