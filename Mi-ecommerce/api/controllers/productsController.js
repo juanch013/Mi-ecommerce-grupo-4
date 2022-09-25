@@ -1,30 +1,28 @@
 const { Op } = require('sequelize');
 const fileHelpers = require('../../helpers/filesHelpers');
 const db = require('../database/models');
+const Picture = require('../database/models/Picture');
 
 
 const productsController = {
 
-    listar: (req, res, next)=>{
+    listar: async (req, res, next)=>{
         const {category} = req.query
         // let products = fileHelpers.getProducts(next);
 
         if(category){
 
-            let products = db.Product.findAll({
-                where:{
-                    [Op.or]:[
-                        {title:{
-                            [Op.like]:`%${category}%`
-                        }},
-                        {description:{
-                            [Op.like]:`%${category}%`
-                        }}
-                    ]
-                }
+            let products = await db.Product.findAll({
+                include:[
+                    {
+                        association:"productcategoria",
+                        attributes:{exclude:['category_id','category_name']},
+                        where:{
+                            category_name:category
+                        },
+                    }
+                ]
             })
-
-            // products = products.filter((prod)=>{return (prod.category).toLowerCase() == (category).toLowerCase()});
 
             if(products.length == 0){
                 return res.status(404).json({
@@ -33,9 +31,6 @@ const productsController = {
                 })
             }
             
-            for(prod of products){
-                    // prod.gallery = fileHelpers.getPicturesFromProduct(prod.id,next);
-            }
 
             return res.status(200).json({
                 error: false,
@@ -45,10 +40,14 @@ const productsController = {
             
         }else{
 
-    
-            for(prod of products){
-                prod.gallery = fileHelpers.getPicturesFromProduct(prod.id,res,next);
-            }
+            let products = await db.Product.findAll({
+                include:[
+                    {
+                        association:"gallery",
+                        as:"gallery"
+                    }
+                ]
+            });
     
             return res.status(200).json({
                         error:false,
@@ -59,45 +58,58 @@ const productsController = {
         }
     },
 
-    detalle: (req, res, next)=>{
-        let products = fileHelpers.getProducts(next);
+    detalle: async (req, res, next)=>{
+        // let products = fileHelpers.getProducts(next);
         const {id} = req.params;
 
-        for(prod of products){
-            if(prod.id == id){
-                prod.gallery = fileHelpers.getPicturesFromProduct(prod.id,next);
-                return res.status(200).json({
-                    error: false,
-                    msg: "Product detail",
-                    data: prod
-                })
-            }
+
+        let prod = await db.Product.findByPk(id,{
+            include:[
+                {
+                    association:"gallery",
+                    as:"gallery"
+                }
+            ]
+        });
+
+        if(!prod){
+            return res.status(404).json({
+                error: true,
+                msg: "Product not found"
+            })
         }
 
-        return res.status(404).json({
-            error: true,
-            msg: "Product not found"
-        })
+
+        return res.status(200).json({
+                        error: false,
+                        msg: "Product detail",
+                        data: prod
+                    });
+        
     },
 
-    mostwanted: (req, res, next)=>{
-        let products = fileHelpers.getProducts(next);
-        let filteredProducts = products.filter((prod)=>{
-            return prod.mostwanted == true;
-        })
+    mostwanted: async (req, res, next)=>{
 
-        for(prod of filteredProducts){
-            prod.gallery = fileHelpers.getPicturesFromProduct(prod.id,next);
-        }
+        let products = await db.Product.findAll({
+            where:{
+                mostwanted:true
+            },
+            include:[
+                {
+                    association:"gallery",
+                    as:"gallery"
+                }
+            ]
+        })
 
         return res.status(200).json({
                     error: false,
                     msg: "Most wanted products",
-                    data: filteredProducts
+                    data: products
                 })
     },
 
-    crear: (req, res, next)=>{
+    crear: async (req, res, next)=>{
         const{title, price, description, gallery, stock, mostwanted, category} = req.body;
 
         const rol = req.newUsers.role;
@@ -109,35 +121,26 @@ const productsController = {
             })
         }
 
-        let products = fileHelpers.getProducts(next);
-        products = fileHelpers.ordenarProductos(products);
-
-        let newId = Number(products[products.length - 1].id) + 1;
-
         const newProduct = {
-            id: newId,
-            price: price,
             title: title,
-            description : description == undefined? "" : description,
-            gallery: [],
+            description: description,
+            price: price == undefined? 0 : price,
             stock: stock == undefined? 0 : stock,
-            mostwanted : mostwanted == undefined? false : mostwanted,
-            category : category
+            mostwanted:mostwanted == undefined? 0 : mostwanted,
+            category_id:category
         }
 
-        products.push(newProduct);
+        db.Product.create(newProduct);
 
-        fileHelpers.guardarProducts(products,next);
-
-        return res.status(201).json({
-            error:false,
-            msg:"Product created",
-            data: newProduct
-        })
+         return res.status(201).json({
+             error:false,
+             msg:"Product created",
+             data: newProduct
+         })
 
     },
-//---------------------------------
-    eliminar: (req, res, next)=>{
+    
+    eliminar: async (req, res, next)=>{
         const {id} = req.params;
         const rol = req.newUsers.role;
         
@@ -148,56 +151,55 @@ const productsController = {
             })
         }
 
-        let products = fileHelpers.getProducts(next);
-
-        if(!products.some((p)=>{ return p.id == id})){
+        let n = await db.Product.destroy({
+                    where:{
+                        product_id:id
+                    }
+                });
+        
+        if(n == 0){
             return res.status(404).json({
-                error: true,
-                msg:"Product not found"
-            })
+                        error: true,
+                        msg:"Product not found"
+                    })
         }
 
-
-        
-        //elimina las imagenes del product que se va a eliminar
-        fileHelpers.eliminarPicturesDeProduct(id,next);
-        
-
-        //filtra os productos y guarda el array que no contiene el producto con producto.id == 'id'
-        products = products.filter((prod)=>{return prod.id != id});
-        fileHelpers.guardarProducts(products ,next);
 
         return res.status(200).json({
-            error: false,
-            msg:"Product deleted"
-        })
-
+                    error: false,
+                    msg:"Product deleted"
+                })
     },
 
-    busqueda: (req, res, next)=>{
-        let products = fileHelpers.getProducts(next);
-        const q = req.query.q;
-
-        let productsFiltrados = [] 
+    busqueda: async (req, res, next)=>{
+        const {q} = req.query; 
         
-        //aca recorro el array de productos y voy pusheando a 'productsFiltrados' los elementos
-        //que contengan la keyword del query string
-        products.forEach(element => {
-            if(element.description.toLowerCase().includes(q.toLowerCase()) || element.title.toLowerCase().includes(q.toLowerCase
-              ())){
-                productsFiltrados.push(element);
-            } 
-        });
 
-        for(prod of productsFiltrados){
-            prod.gallery = fileHelpers.getPicturesFromProduct(prod.id,next);
-        }
+        let productsFiltrados = await db.Product.findAll({
+            where:{
+                [Op.or]:[
+                    {title:{
+                        [Op.like]:`%${q}%`
+                    }},
+                    {description:{
+                        [Op.like]:`%${q}%`
+                    }}
+                ]
+            },
 
-        if (productsFiltrados.length == 0){
-            return res.status(404).json({
-                error: true,
-                msg: "No products found"
-            })
+            include:[
+                {
+                    association:"gallery",
+                    as:"gallery"
+                }
+            ]
+        })
+
+        if (!productsFiltrados.length) {
+          return res.status(404).json({
+            error: true,
+            msg: "Not found products with this search."
+          });
         }
 
         return res.status(200).json({
@@ -207,7 +209,7 @@ const productsController = {
         })
     },
 
-    modificar: (req, res, next)=>{
+    modificar: async (req, res, next)=>{
         const {id} = req.params;
 
         const rol = req.newUsers.role;
@@ -219,34 +221,35 @@ const productsController = {
             })
         }
 
-        const {title, description, price, gallery, category, mostwanted, stock} = req.body;
+        const {title, description, price, gallery, category_id, mostwanted, stock} = req.body;
 
-        let products = fileHelpers.getProducts(next);
 
-        if(!products.some((prod)=>{return prod.id == id})){
-            return res.status(404).json({
-                msg:`Doesn't exist a product with id ${id}`
-            })
-        }
+        let prod = await db.Product.findByPk(id);
 
-        let prodModificado = {};
-
-        for(prod of products){
-            if(prod.id == id){
-                prod.title = title == undefined || title == "" ? prod.title : title;
-                prod.description = description == undefined || description == "" ? prod.description : description;
-                prod.price = price == undefined? prod.price : price;
-                prod.stock = stock == undefined? prod.stock : stock;
-                prod.mostwanted = mostwanted == undefined? prod.mostwanted : mostwanted;
-                prod.category = category == undefined? prod.undefined : undefined;
-                prod.gallery = gallery == undefined? prod.gallery : gallery;
-                prodModificado = prod;
-                break;
+        if(category_id != undefined){
+            if(!fileHelpers.existeCat(category_id)){
+                return res.status(400).jason({
+                    error:true,
+                    msg:`category with id = ${category_id} does not exist`
+                })
             }
         }
-        
-        fileHelpers.guardarProducts(products, next);
 
+        let prodModificado = {
+            title: title == undefined? prod.title : title,
+            description: description == undefined? prod.description : description,
+            price : price == undefined? prod.price : price,
+            category_id : category_id == undefined? prod.category_id : category_id,
+            mostwanted: mostwanted == undefined? prod.mostwanted : mostwanted,
+            stock: stock == undefined? prod.stock : stock
+        }
+
+        await db.Product.update(prodModificado,{
+            where:{
+                product_id : id
+            }
+        })
+        
         return res.status(200).json({
             error: false,
             msg:"Product modified",
@@ -254,66 +257,64 @@ const productsController = {
         })
     },
 
-    pictures: (req, res, next) => {
-      try {
+    pictures: async (req, res, next) => {
         const { id } = req.params;
 
-        if (
-          req.newUsers.role !== 'admin' &&
-          req.newUsers.role !== 'guest' &&
-          req.newUsers.role !== 'god'
-        ) {
-          return res.status(401).json({ 
-            error: true,
-            msg: 'You are not authorized to access this resource',
-          });
+        try {
+    
+            const productExists = await db.Product.findByPk(id);
+    
+            if (!productExists) {
+                return res.status(404).json({
+                    error: true,
+                    msg: 'Product not found',
+                });
+            }
+    
+            const picturesProduct = await db.Picture.findAll({
+                where: {
+                    product_id: id,
+                },
+            });
+    
+            if (!picturesProduct.length) {
+                return res.status(404).json({
+                    error: true,
+                    msg: 'The product does not have images',
+                });
+            }
+    
+            res.status(200).json({
+                error: false,
+                msg: 'Product photo list',
+                data: picturesProduct,
+            });
+        } catch (error) {
+            next(error);
         }
-    
-        const products = fileHelpers.getProducts(res, next);
-    
-        const productExists = products.find(
-          (product) => product.id === parseInt(id)
-        );
-        if (!productExists) {
-          return res.status(404).json({ error: 'Product not found', message: '' });
-        }
-    
-        // Se lee el arhivo de pictures
-        const pictures = fileHelpers.getImages(next);
-    
-        const picturesProduct = pictures?.filter(
-          (picture) => picture.productId === parseInt(id)
-        );
-    
-        if (!picturesProduct.length) {
-          return res
-            .status(404)
-            .json({ error: 'The product does not have images', message: '' });
-        }
-    
-        res.status(200).json(picturesProduct);
-      } catch (error) {
-        next(error);
-      }
     },
+    categoria: async (req, res, next)=>{
 
-    categoria: (req, res, next)=>{
-
-        let products = fileHelpers.getProducts(next);
         const {category} = req.query;
         
 
-        products = products.filter((prod)=>{return prod.category == category});
+       let products = db.Product.findAll({
+        include:[
+            {
+                association:"gallery",
+
+                where:{
+                    category_name:category
+                }
+            },
+        ]
+       })
 
         if(products.length == 0){
             return res.status(404).json({
                 error:true,
                 msg: "No products found"
             })
-        }
-
-        for(prod of products){
-                prod.gallery = fileHelpers.getPicturesFromProduct(prod.id,next);
         }
 
         return res.status(200).json({
