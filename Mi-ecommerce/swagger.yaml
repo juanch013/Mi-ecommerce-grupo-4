@@ -1347,20 +1347,40 @@ paths:
               properties:
                 title:
                   type: string
+                  example: "Macbook Pro 16.2 M1 Max 32gb 1tb Ssd" 
                 price:
                   type: number
+                  example: 265080
                 description:
                   type: string
+                  example: "La mejor Macbook del mercado"
                 category:
-                  type: string
+                  type: number
+                  example: 100
                 mostwanted:
                   type: boolean
+                  example: true
                 stock:
                   type: number
+                  example: 10
 
       responses:
-        "401":
+        '400':
           description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  msg:
+                    type: string
+                    example: Error creating product
+        
+        '401':
+          description: Unauthorized
           content:
             application/json:
               schema:
@@ -1371,7 +1391,8 @@ paths:
                     example: false
                   msg:
                     type: string
-                    example: Los parametros de entrada no eran correctos
+                    example: Not authorized
+
         "500":
           description: Internal error
           content:
@@ -1385,8 +1406,8 @@ paths:
                   msg:
                     type: string
                     example: Server Error
-        "200":
-          description: Litsado de productos
+        '201':
+          description: Producto creado
           content:
             application/json:
               schema:
@@ -1394,8 +1415,10 @@ paths:
                 properties:
                   ok:
                     type: boolean
+                    example: true
                   msg:
                     type: string
+                    example: Product created
                   data:
                     type: object
                     properties:
@@ -1407,19 +1430,6 @@ paths:
                         type: number
                       description:
                         type: string
-                      gallery:
-                        type: array
-                        items:
-                          type: object
-                          properties:
-                            id:
-                              type: number
-                            url:
-                              type: string
-                            descripcion:
-                              type: string
-                            product_id:
-                              type: number
                       category:
                         type: string
                       mostwanted:
