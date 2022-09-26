@@ -18,8 +18,11 @@ const productsController = {
                             association:"productcategoria",
                             attributes:{exclude:['category_id','category_name']},
                             where:{
-                                category_name:category
+                                category_id:category
                             },
+                        },
+                        {
+                            association:'gallery'
                         }
                     ]
                 })
@@ -59,18 +62,13 @@ const productsController = {
             
         } catch (error) {
             console.log(error);
-            return res.status(500).json({
-                error: true,
-                msg:'Internal error'
-            })
+            next(error);
         }
     },
 
     detalle: async (req, res, next)=>{
        try {
            const {id} = req.params;
-   
-   
            let prod = await db.Product.findByPk(id,{
                include:[
                    {
@@ -79,15 +77,12 @@ const productsController = {
                    }
                ]
            });
-   
            if(!prod){
                return res.status(404).json({
                    error: true,
                    msg: "Product not found"
                })
            }
-   
-   
            return res.status(200).json({
                            error: false,
                            msg: "Product detail",
@@ -95,11 +90,8 @@ const productsController = {
                        });
         
        } catch (error) {
-        console.log(error);
-            return res.status(500).json({
-                error: true,
-                msg:'Internal error'
-            })
+            console.log(error);
+            next(error);
        }
         
     },
@@ -126,10 +118,7 @@ const productsController = {
             
         } catch (error) {
             console.log(error);
-            return res.status(500).json({
-                error: true,
-                msg:'Internal error'
-            })
+            next(error);
         }
 
     },
@@ -166,33 +155,8 @@ const productsController = {
             
         } catch (error) {
             console.log(error);
-            return res.status(500).json({
-                error: true,
-                msg:'Internal error'
-            })
+            next(error);
         }
-
-        const newProduct = await db.Product.create({
-          title: title,
-          description: description,
-          price: price == undefined? 0 : price,
-          stock: stock == undefined? 0 : stock,
-          mostwanted:mostwanted == undefined? 0 : mostwanted,
-          category_id:category
-        });
-
-        if (!newProduct) {
-          return res.status(400).json({
-            error: true,
-            msg: "Error creating product",
-          });
-        }
-
-         return res.status(201).json({
-             error:false,
-             msg:"Product created",
-             data: newProduct
-         })
     },
     
     eliminar: async (req, res, next)=>{
@@ -206,7 +170,20 @@ const productsController = {
                     msg:"You don't have permission to delete a product"
                 })
             }
+
+            let prodInCarts = await db.cart_product.findAll({
+                where:{
+                    product_id:id
+                }
+            })
     
+            if(prodInCarts.length != 0){
+                return res.status(400).json({
+                    error:true,
+                    msg:`Product with id = ${id} is included in some carts, delete it from the carts in order to delete the product`
+                })
+            }
+
             let n = await db.Product.destroy({
                         where:{
                             product_id:id
@@ -228,10 +205,7 @@ const productsController = {
             
         } catch (error) {
             console.log(error);
-            return res.status(500).json({
-                error: true,
-                msg:'Internal error'
-            })
+            next(error);
         }
     },
 
@@ -267,10 +241,7 @@ const productsController = {
             
         } catch (error) {
             console.log(error);
-            return res.status(500).json({
-                error: true,
-                msg:'Internal error'
-            })
+            next(error);
         }
     },
 
@@ -278,50 +249,54 @@ const productsController = {
         try {
             
             const {id} = req.params;
-        const rol = req.newUsers.role;
-        if(rol == "guest"){
-            return res.status(401).json({
-                error: true,
-                msg:"You don't have permission to modify a product"
-            })
-        }
-
-        const {title, description, price, gallery, category_id, mostwanted, stock} = req.body;
-        let prod = await db.Product.findByPk(id);
-
-        if(category_id != undefined){
-            if(!fileHelpers.existeCat(category_id)){
-                return res.status(400).jason({
-                    error:true,
-                    msg:`category with id = ${category_id} does not exist`
+            const rol = req.newUsers.role;
+            if(rol == "guest"){
+                return res.status(401).json({
+                    error: true,
+                    msg:"You don't have permission to modify a product"
                 })
             }
-        }
-        let prodModificado = {
-            title: title == undefined? prod.title : title,
-            description: description == undefined? prod.description : description,
-            price : price == undefined? prod.price : price,
-            category_id : category_id == undefined? prod.category_id : category_id,
-            mostwanted: mostwanted == undefined? prod.mostwanted : mostwanted,
-            stock: stock == undefined? prod.stock : stock
-        }
-        await db.Product.update(prodModificado,{
-            where:{
-                product_id : id
+
+            const {title, description, price, category_id, mostwanted, stock} = req.body;
+            let prod = await db.Product.findByPk(id);
+
+            if(prod == undefined){
+                return res.status(401).json({
+                    error: true,
+                    msg:`Product with id = ${id} does not exist`
+                })
             }
-        })
-        return res.status(200).json({
-            error: false,
-            msg:"Product modified",
-            data:prodModificado
-        })
+
+            if(category_id != undefined){
+                if(!fileHelpers.existeCat(category_id)){
+                    return res.status(400).jason({
+                        error:true,
+                        msg:`category with id = ${category_id} does not exist`
+                    })
+                }
+            }
+            let prodModificado = {
+                title: title == undefined? prod.title : title,
+                description: description == undefined? prod.description : description,
+                price : price == undefined? prod.price : price,
+                category_id : category_id == undefined? prod.category_id : category_id,
+                mostwanted: mostwanted == undefined? prod.mostwanted : mostwanted,
+                stock: stock == undefined? prod.stock : stock
+            }
+            await db.Product.update(prodModificado,{
+                where:{
+                    product_id : id
+                }
+            })
+            return res.status(200).json({
+                error: false,
+                msg:"Product modified",
+                data:prodModificado
+            })
 
         } catch (error) {
             console.log(error);
-            return res.status(500).json({
-                error: true,
-                msg:'Internal error'
-            })
+            next(error);
         }
         
     },
@@ -362,6 +337,7 @@ const productsController = {
             next(error);
         }
     },
+
     categoria: async (req, res, next)=>{
 
         try {
