@@ -9,6 +9,7 @@ const id = req.params.id
 if(req.newUsers.user_id == id || role === 'god' || role === 'admin'){
     try {
         const cartExists = await db.Cart.findByPk(id)
+
         if(!cartExists){
             return res.status(404).json({
                 error: true,
