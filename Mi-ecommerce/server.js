@@ -14,10 +14,12 @@ const {
 	clientErrorHandler,
 } = require('./api/middlewares/errorHandler');
 
+
 // Carga de jsons
 const users = require('./api/data.json/user.json')
 const products = require('./api/data.json/products.json')
 const categories = require('./api/data.json/categories.json')
+
 
 const db = require('./api/database/models');
 const usersRoutes = require('./api/routes/usersRoutes');
@@ -27,6 +29,7 @@ const cartsRoutes = require('./api/routes/cartRoutes');
 const categoryRoutes = require('./api/routes/categoryRoutes');
 const usersController = require('./api/controllers/usersController');
 const { mostwanted } = require('./api/controllers/productsController');
+const cargarDatosRoutes = require('./api/routes/cargarDatosRoutes');
 
 
 const route = express.Router();
@@ -43,6 +46,7 @@ route.use('/products', productsRoutes);
 route.use('/pictures', picturesRoutes);
 route.use('/carts', cartsRoutes);
 route.use('/category', categoryRoutes);
+route.use('/cargar',cargarDatosRoutes),
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
@@ -50,6 +54,7 @@ app.use(logErrors);
 app.use(clientErrorHandler);
 
 app.listen(process.env.PORT, () => {
+
 	sequelize.sync(
     { force: true }
     ).then(async () => {
