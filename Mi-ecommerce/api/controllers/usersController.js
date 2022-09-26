@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const fileHelpers = require('../../helpers/filesHelpers');
 const {generateJWT} = require('../../helpers/generateJWT');
 const db = require('../database/models');
+const { Op } = require('sequelize')
 
 
 //Recibe array de usuarios y un id de usuario. 
@@ -34,7 +35,7 @@ const usersController = {
                     }
                 }
             );
-            return res.status(200).send({
+            return res.status(200).json({
                 error: false,
                 msg: 'Users list',  
                 data: users
@@ -58,7 +59,7 @@ const usersController = {
             );
 
             if(!user){
-                return res.status(404).send({
+                return res.status(404).json({
                     error: true,
                     msg: "User does not exists."
                 });
@@ -74,27 +75,57 @@ const usersController = {
         }
     },
 
-    createUser: function(req, res, next) {
+    createUser: async function(req, res, next) {
+
         const userFromRequest = req.body;
-        const users = fileHelpers.getUsers(next);
 
-        // Si usuario ya existe en la base de datos no se puede crear
-        const userExists = users.find((u) => u.username === userFromRequest.username);
-        if(userExists) {return res.status(400).json({error:true, msg: "User already exists."});}
+        try {
+            const userFound = await db.User.findOne(
+                {
+                    where: 
+                    {
+                        [Op.or]: [{username: userFromRequest.username}, {email: userFromRequest.email}]
+                    }
+                }
+            )
+            if(userFound)
+            {
+                if(userFound.username === userFromRequest.username)
+                {
+                    return res.status(400).json({
+                        error: true,
+                        msg: "Username is already registred",
+                    });
+                }
+                if(userFound.email === userFromRequest.email)
+                {
+                    return res.status(400).json({
+                        error: true,
+                        msg: "E-mail is already registred",
+                    });
+                }
+            }
+            
+            const hash = await bcrypt.hash(userFromRequest.password, 10);
 
-        // Se hashea la contraseña
-        const hash = bcrypt.hashSync(userFromRequest.password, 10);
+            const newUser = await db.User.create({
+                first_name: userFromRequest.firstname, 
+                last_name: userFromRequest.lastname, 
+                username: userFromRequest.username, 
+                password: hash, 
+                email: userFromRequest.email, 
+                role: userFromRequest.role,
+                profilepic: userFromRequest.profilepic? userFromRequest.profilepic : null
+            })
 
-        // Se guarda la contrasena hasheada en el objeto
-        userFromRequest.password = hash;
-
-        // Se accede al id del ultimo usuario y se le suma 1
-        const id = users.at(-1).id + 1;
-        const userToAdd = {id, ...userFromRequest};
-        users.push(userToAdd);
-
-        fileHelpers.guardarUsers(users, next);
-        return res.status(201).json({error:false , msg: "User created successfully.", data:getUserWithoutPassword(userToAdd)});
+            res.status(201).json({
+                error: false,
+                msg: "User created successfully",
+                data: newUser
+            })
+        } catch (error) {
+            next(error);
+        }
     },
 
     login: async function(req, res, next) {
