@@ -1,7 +1,10 @@
 require('dotenv').config();
 const express = require('express');
-const route = express.Router();
+const cors = require('cors');
 const { sequelize } = require('./api/database/models')
+
+const route = express.Router();
+
 const usersRoutes = require('./api/routes/usersRoutes');
 const productsRoutes = require('./api/routes/productsRoutes');
 const picturesRoutes = require('./api/routes/picturesRoutes');
@@ -20,6 +23,7 @@ const app = express();
 const PORT = 3000;
 
 app.use(express.json());
+// app.use(cors());
 
 //Routes
 app.use('/api/v1/',route);

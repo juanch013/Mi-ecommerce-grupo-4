@@ -17,11 +17,11 @@ const description = joi.string().min(10).max(150).messages({
 	'string.max': 'Description must be at most 150 characters long',
 });
 
-const category = joi.string().min(3).max(50).messages({
-	'string.base': 'Category must be a string',
-	'string.min': 'Category must be at least 3 character long',
-	'string.max': 'Category must be at most 50 characters long',
+const category = joi.number().min(1).messages({
+  'number.base': 'Category must be a number',
+  'number.min': 'Category must be a number greater than 0',
 });
+
 
 const mostwanted = joi.boolean().messages({
 	'boolean.base': 'Most wanted must be a boolean',
