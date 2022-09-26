@@ -217,10 +217,6 @@ const usersController = {
             );
 
             if(!user) {return res.status(404).json({error: true, msg: "User does not exists."});}
-
-            await db.Cart.destroy({
-                where: {user_id: userId}
-            });
             
             await db.User.destroy({
                 where: {user_id: userId}

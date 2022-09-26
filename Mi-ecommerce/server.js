@@ -60,5 +60,10 @@ app.listen(process.env.PORT, () => {
 		);
 
 
-	console.log(`Servidor corriendo en el puerto ${process.env.PORT}`);
+app.listen(PORT, () => {
+  sequelize.sync(
+    {force:true}
+  ); 
+	console.log(`Servidor corriendo en el puerto ${PORT}`);
+
 });
