@@ -27,14 +27,16 @@ const Cart = (sequelize, DataTypes) => {
 
         Cart.belongsTo(models.User,{
             as:"cartuser",
-            foreignKey:"user_id"
+            foreignKey:"user_id",
+            onDelete: "CASCADE"
         })
 
         Cart.belongsToMany(models.Product, {
             as: "cartproduct",
             through: 'cart_product',
             foreignKey: 'cart_id',
-            otherKey: 'product_id'
+            otherKey: 'product_id',
+	        onDelete: "CASCADE"
         })
     }
     return Cart;
