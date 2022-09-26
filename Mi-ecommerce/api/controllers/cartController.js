@@ -73,7 +73,7 @@ const cartEdit = async (req,res,next) => {
                 
                 //Sobreescribiendo cantidad
                 //     const cartUpdate = await db.cart_product.upsert({
-                //         product_id: newProduct.id,
+                //         product_id: newProduct.id
                 //         cart_id: id,
                 //         quantity: newProduct.quantity
                 // })
@@ -122,7 +122,8 @@ const cartEdit = async (req,res,next) => {
                 const cart = await db.cart_product.findAll({
                     where:{
                         'cart_id': id
-                    }
+                    },
+                    includes: ['product_id', 'quantity']
                 })
                 res.status(200).json({
                     error: false,
