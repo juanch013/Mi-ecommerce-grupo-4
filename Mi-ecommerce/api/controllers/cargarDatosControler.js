@@ -17,7 +17,6 @@ const cargarDatosController = {
                 profilpic: u.profilepic,
             });
         }
-        //devolver un array de los id de usuarios creados
     const users2 = await db.User.findAll({
         attributes: ['user_id']
       })
@@ -30,7 +29,7 @@ const cargarDatosController = {
           cart_id: id
         })
       }
-  
+      //carga de categorias
       for await (let category of categories) {
         await db.Category.upsert({
           category_name: category.category_name
@@ -46,8 +45,7 @@ const cargarDatosController = {
           category: product.category
         })
       }
-          
-      
+
         res.status(200).json({
             error:false,
             msg: "Se cargaron los datos exitosamente",
