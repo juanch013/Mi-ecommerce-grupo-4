@@ -29,7 +29,9 @@ const usersController = {
         try {
             let users = await db.User.findAll(
                 {
-                    attributes: ['user_id', 'first_name', 'last_name', 'username', 'email', 'role', 'profilepic']
+                    attributes: {
+                        exclude: ['password']
+                    }
                 }
             );
             return res.status(200).send({
@@ -38,30 +40,38 @@ const usersController = {
                 data: users
             });
         } catch (error) {
-            return res.status(500).send({
-                error: true,
-                msg: 'Server error',
-                data: error
-            });
+            next(error);
         }
     }, 
 
-    getUser: function(req, res, next) {
-        const users = fileHelpers.getUsers(next);
+    getUser: async function(req, res, next) {
+
         const userId = Number(req.params.id);
+        try {
+            const user = await db.User.findByPk(
+                userId, 
+                {
+                    attributes: {
+                        exclude: ['password']
+                    }
+                }
+            );
 
-        //Searches for userIndex. If userIndex === -1 means user wasn't found.
-        const userIndex = findUserById(users, userId);
-        if(userIndex < 0) {return res.status(404).json({
-            error: true,
-            msg: "User does not exists."})}
+            if(!user){
+                return res.status(404).send({
+                    error: true,
+                    msg: "User does not exists."
+                });
+            }
 
-        const userWithoutPassword = getUserWithoutPassword(users[userIndex])
-        return res.status(200).json({
-            error: false,
-            msg:"Detalle de usuario",
-            data:userWithoutPassword});
-
+            return res.status(200).json({
+                error: false,
+                msg:"Detalle de usuario",
+                data:user
+            });
+        }catch(error){
+            next(error);
+        }
     },
 
     createUser: function(req, res, next) {
