@@ -28,7 +28,6 @@ const picturesRoutes = require('./api/routes/picturesRoutes');
 const cartsRoutes = require('./api/routes/cartRoutes');
 const categoryRoutes = require('./api/routes/categoryRoutes');
 const usersController = require('./api/controllers/usersController');
-const { mostwanted } = require('./api/controllers/productsController');
 const cargarDatosRoutes = require('./api/routes/cargarDatosRoutes');
 
 
