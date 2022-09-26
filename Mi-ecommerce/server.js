@@ -46,10 +46,12 @@ app.use(logErrors);
 app.use(clientErrorHandler);
 
 app.listen(process.env.PORT, () => {
-	sequelize.sync({ force: true }).then(async () => {
+	sequelize.sync(
+    { force: true }
+    ).then(async () => {
 
 		for await (let u of users) {
-			await db.User.create({
+			await db.User.upsert({
 				first_name: u.first_name,
 				last_name: u.last_name,
 				username: u.username,
@@ -59,6 +61,22 @@ app.listen(process.env.PORT, () => {
 				profilpic: u.profilepic,
 			});
 		}
+    
+    //devolver un array de los id de usuarios creados
+    const users2 = await db.User.findAll({
+      attributes: ['user_id']
+    })
+    const usersMapped = users2.map(user => user.user_id)
+
+  
+    //crear por cada id de usuario un carrito 
+    for await (let id of usersMapped) {
+      await db.Cart.create({
+        user_id: id,
+        cart_id: id
+      })
+    }
+
     
 	});
 
