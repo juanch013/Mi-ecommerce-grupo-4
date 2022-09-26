@@ -53,6 +53,7 @@ const cartEdit = async (req,res,next) => {
             }
 
             const productExists = await db.Product.findByPk(newProduct.id)
+
             if(!productExists){
                 return res.status(404).json({
                     error: true,
@@ -64,6 +65,7 @@ const cartEdit = async (req,res,next) => {
                 where:{product_id: newProduct.id},
                 attributes: ['stock']
             })
+            
             if(stockProd.dataValues.stock - newProduct.quantity < 0){
                 return res.status(404).json({
                     error: true,
