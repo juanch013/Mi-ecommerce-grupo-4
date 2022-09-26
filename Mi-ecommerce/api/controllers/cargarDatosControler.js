@@ -29,7 +29,7 @@ const cargarDatosController = {
           cart_id: id
         })
       }
-  
+      //carga de categorias
       for await (let category of categories) {
         await db.Category.upsert({
           category_name: category.category_name
