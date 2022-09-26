@@ -46,6 +46,7 @@ app.use(logErrors);
 app.use(clientErrorHandler);
 
 app.listen(process.env.PORT, () => {
+
 	sequelize.sync(
 		{ force: true }
 		);
