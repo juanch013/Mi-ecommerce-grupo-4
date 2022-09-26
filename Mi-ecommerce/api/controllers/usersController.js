@@ -71,9 +71,7 @@ const usersController = {
     },
 
     createUser: async function(req, res, next) {
-
         const userFromRequest = req.body;
-
         try {
             const userFound = await db.User.findOne(
                 {

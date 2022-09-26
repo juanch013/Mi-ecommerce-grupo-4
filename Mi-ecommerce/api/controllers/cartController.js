@@ -54,6 +54,7 @@ const cartEdit = async (req,res,next) => {
             }
             //Hallar el carrito
             const productExists = await db.Product.findByPk(newProduct.id)
+
             if(!productExists){
                 return res.status(404).json({
                     error: true,

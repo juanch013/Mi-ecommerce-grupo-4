@@ -1,10 +1,14 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { sequelize } = require('./api/database/models')
+const { sequelize } = require('./api/database/models');
 
 const route = express.Router();
 
+// Carga de jsons
+const users = require('./api/data.json/user.json');
+
+const db = require('./api/database/models');
 const usersRoutes = require('./api/routes/usersRoutes');
 const productsRoutes = require('./api/routes/productsRoutes');
 const picturesRoutes = require('./api/routes/picturesRoutes');
@@ -17,32 +21,45 @@ const swaggerUi = require('swagger-ui-express');
 const YAML = require('yamljs');
 const swaggerDocument = YAML.load('./swagger.yaml');
 //Middlewares
-const {logErrors,clientErrorHandler} = require('./api/middlewares/errorHandler');
+const {
+	logErrors,
+	clientErrorHandler,
+} = require('./api/middlewares/errorHandler');
 
 const app = express();
-const PORT = 3000;
 
 app.use(express.json());
 // app.use(cors());
 
 //Routes
-app.use('/api/v1/',route);
+app.use('/api/v1/', route);
 route.post('/login', usersController.login);
 route.use('/users', usersRoutes);
 route.use('/products', productsRoutes);
 route.use('/pictures', picturesRoutes);
 route.use('/carts', cartsRoutes);
-route.use('/category',categoryRoutes);
+route.use('/category', categoryRoutes);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(logErrors);
 app.use(clientErrorHandler);
 
+app.listen(process.env.PORT, () => {
+	sequelize.sync({ force: true }).then(async () => {
 
-app.listen(PORT, () => {
-  sequelize.sync(
-     //{force:true}
-  ); 
-	console.log(`Servidor corriendo en el puerto ${PORT}`);
+		for await (let u of users) {
+			await db.User.create({
+				first_name: u.first_name,
+				last_name: u.last_name,
+				username: u.username,
+				email: u.email,
+				password: u.password,
+				role: u.role,
+				profilpic: u.profilepic,
+			});
+		}
+    
+	});
+	console.log(`Servidor corriendo en el puerto ${process.env.PORT}`);
 });
