@@ -15,8 +15,9 @@ const Product = (sequelize, DataType)=>{
             allowNull:false
         },
 
+        //precio con dos decimales
         price:{
-            type: DataType.DECIMAL(4,1),
+            type: DataType.DECIMAL(10,2),
             allowNull:false
         },
 

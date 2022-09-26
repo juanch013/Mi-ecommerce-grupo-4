@@ -11,13 +11,14 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false
         },
-        username: { 
-            type: DataTypes.STRING,
-            allowNull: false
-        },
         last_name: { 
             type: DataTypes.STRING,
             allowNull: false
+        },
+        username: { 
+            type: DataTypes.STRING,
+            allowNull: false,
+            unique: true
         },
         password: {
             type: DataTypes.STRING,
@@ -25,7 +26,8 @@ module.exports = (sequelize, DataTypes) => {
         },
         email: { 
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: false,
+            unique: true
         },
         role: { 
             type: DataTypes.ENUM('admin' , 'god', 'guest'),

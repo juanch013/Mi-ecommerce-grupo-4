@@ -172,6 +172,27 @@ const productsController = {
             })
         }
 
+        const newProduct = await db.Product.create({
+          title: title,
+          description: description,
+          price: price == undefined? 0 : price,
+          stock: stock == undefined? 0 : stock,
+          mostwanted:mostwanted == undefined? 0 : mostwanted,
+          category_id:category
+        });
+
+        if (!newProduct) {
+          return res.status(400).json({
+            error: true,
+            msg: "Error creating product",
+          });
+        }
+
+         return res.status(201).json({
+             error:false,
+             msg:"Product created",
+             data: newProduct
+         })
     },
     
     eliminar: async (req, res, next)=>{
@@ -215,7 +236,6 @@ const productsController = {
     },
 
     busqueda: async (req, res, next)=>{
-
         try {
             const {q} = req.query; 
     

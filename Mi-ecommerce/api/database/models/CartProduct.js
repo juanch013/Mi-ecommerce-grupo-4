@@ -5,24 +5,28 @@ const CartProduct = (sequelize, DataTypes) => {
         cart_id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
-            autoIncrement: true,
             allowNull: false
         },
         product_id:{
             type: DataTypes.INTEGER,
             allowNull: false,
-            unique:true
+            primaryKey: true,
         },
         quantity:{
             type: DataTypes.INTEGER,
             allowNull: false
         },
+        createdAt:{
+            type: DataTypes.DATE
+        },
+        updatedAt:{
+            type: DataTypes.DATE
+        }
 
     };
     const config = {
         timestamps: true,
-        createdAt: true,
-        updatedAt: true
+
     }
     const CartProduct = sequelize.define(alias,cols,config);
     return CartProduct;
