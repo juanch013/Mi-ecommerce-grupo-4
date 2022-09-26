@@ -1,21 +1,21 @@
 const bcrypt = require('bcrypt');
-const fileHelpers = require('../../helpers/filesHelpers');
 const {generateJWT} = require('../../helpers/generateJWT');
 const db = require('../database/models');
+const { Op } = require('sequelize')
 
 
 //Recibe array de usuarios y un id de usuario. 
 //Retorna el indice del usuario en el array de usuarios cuyo id coincide con el parametro id recibido.
-const findUserById = (users, id) => {
-    let userIndex = -1;
-    users.forEach((user, index) => {
-        if(user.id === id)
-        {
-            userIndex = index;
-        }
-    })
-    return userIndex;
-}
+// const findUserById = (users, id) => {
+//     let userIndex = -1;
+//     users.forEach((user, index) => {
+//         if(user.id === id)
+//         {
+//             userIndex = index;
+//         }
+//     })
+//     return userIndex;
+// }
 
 // Filters out password field from user object so it's not returned
 // const getUserWithoutPassword = (user) => {
@@ -29,142 +29,211 @@ const usersController = {
         try {
             let users = await db.User.findAll(
                 {
-                    attributes: ['user_id', 'first_name', 'last_name', 'username', 'email', 'role', 'profilepic']
+                    attributes: {exclude: ['password']}
                 }
             );
-            return res.status(200).send({
+            return res.status(200).json({
                 error: false,
                 msg: 'Users list',  
                 data: users
             });
         } catch (error) {
-            return res.status(500).send({
-                error: true,
-                msg: 'Server error',
-                data: error
-            });
+            next(error);
         }
     }, 
 
-    getUser: function(req, res, next) {
-        const users = fileHelpers.getUsers(next);
+    getUser: async function(req, res, next) {
+
         const userId = Number(req.params.id);
+        try {
+            const user = await db.User.findByPk(
+                userId, 
+                {
+                    attributes: {exclude: ['password']}
+                }
+            );
 
-        //Searches for userIndex. If userIndex === -1 means user wasn't found.
-        const userIndex = findUserById(users, userId);
-        if(userIndex < 0) {return res.status(404).json({
-            error: true,
-            msg: "User does not exists."})}
+            if(!user){
+                return res.status(404).json({
+                    error: true,
+                    msg: "User does not exists."
+                });
+            }
 
-        const userWithoutPassword = getUserWithoutPassword(users[userIndex])
-        return res.status(200).json({
-            error: false,
-            msg:"Detalle de usuario",
-            data:userWithoutPassword});
-
+            return res.status(200).json({
+                error: false,
+                msg:"Detalle de usuario",
+                data:user
+            });
+        }catch(error){
+            next(error);
+        }
     },
 
-    createUser: function(req, res, next) {
+    createUser: async function(req, res, next) {
+
         const userFromRequest = req.body;
-        const users = fileHelpers.getUsers(next);
 
-        // Si usuario ya existe en la base de datos no se puede crear
-        const userExists = users.find((u) => u.username === userFromRequest.username);
-        if(userExists) {return res.status(400).json({error:true, msg: "User already exists."});}
+        try {
+            const userFound = await db.User.findOne(
+                {
+                    where: 
+                    {
+                        [Op.or]: [{username: userFromRequest.username}, {email: userFromRequest.email}]
+                    }
+                }
+            )
+            if(userFound)
+            {
+                if(userFound.username === userFromRequest.username)
+                {
+                    return res.status(400).json({
+                        error: true,
+                        msg: "Username is already registred",
+                    });
+                }
+                if(userFound.email === userFromRequest.email)
+                {
+                    return res.status(400).json({
+                        error: true,
+                        msg: "E-mail is already registred",
+                    });
+                }
+            }
+            
+            const hash = await bcrypt.hash(userFromRequest.password, 10);
 
-        // Se hashea la contraseña
-        const hash = bcrypt.hashSync(userFromRequest.password, 10);
+            //Create new user
+            const newUser = await db.User.create({
+                first_name: userFromRequest.firstname, 
+                last_name: userFromRequest.lastname, 
+                username: userFromRequest.username, 
+                password: hash, 
+                email: userFromRequest.email, 
+                role: userFromRequest.role,
+                profilepic: userFromRequest.profilepic? userFromRequest.profilepic : null
+            })
 
-        // Se guarda la contrasena hasheada en el objeto
-        userFromRequest.password = hash;
+            //Create new cart
+            await db.Cart.create({
+                user_id: newUser.user_id
+            })
 
-        // Se accede al id del ultimo usuario y se le suma 1
-        const id = users.at(-1).id + 1;
-        const userToAdd = {id, ...userFromRequest};
-        users.push(userToAdd);
-
-        fileHelpers.guardarUsers(users, next);
-        return res.status(201).json({error:false , msg: "User created successfully.", data:getUserWithoutPassword(userToAdd)});
+            res.status(201).json({
+                error: false,
+                msg: "User created successfully",
+                data: newUser
+            })
+        } catch (error) {
+            next(error);
+        }
     },
 
     login: async function(req, res, next) {
         const {username,password} = req.body;
 
-        let users = fileHelpers.getUsers(next);
-        let usuarioFind = users.find(u => u.username == username);
+        try {
+            let userFound = await db.User.findOne({
+                where: {username: username},
+            })
 
-        let passwordMatch = null;
-        if (usuarioFind) {
-          // Se compara la contraseña hasheada con la contraseña ingresada por el usuario
-          passwordMatch = await bcrypt.compare(password, usuarioFind.password);
+            let hashMatches = false;
+            if(userFound) {hashMatches = await bcrypt.compare(password, userFound.password);}
+
+            if(!userFound || !hashMatches)
+            {
+                return res.status(401).json({
+                    error:true,
+                    msg: "Credentials are not valid"
+                })
+            }
+
+            const userFoundWithoutPassword = await db.User.findOne({
+                where: {username: username},
+                attributes: {exclude: ['password']}
+            })
+
+            const token = await generateJWT(userFoundWithoutPassword.dataValues);
+  
+            return res.status(200).json({
+                error:false,
+                msg:"authorized",
+                data:{
+                    idUser: userFoundWithoutPassword.user_id,
+                    username: userFoundWithoutPassword.username
+                },
+                token: token
+            })
+        } catch (error) {
+            next(error)
         }
-
-        // Si el usuario no existe o la contraseña no coincide se envia un mensaje de error
-        if(!usuarioFind || !passwordMatch){
-           return res.status(401).json({
-              error:true,
-              msg:"Credentials are not valid"
-           })
-        }
-
-        const userFoundWithoutPassword = getUserWithoutPassword(usuarioFind);
-
-        let payload = {
-              ...userFoundWithoutPassword
-           }  
-     
-        const token = await generateJWT(payload);
-
-        return res.status(200).json({
-            error:false,
-            msg:"authorized",
-            data:{
-                idUser: usuarioFind.id,
-                username: usuarioFind.username
-            },
-            token: token
-        })
-
     },
 
-    updateUser: function(req, res, next) {
-        let users = fileHelpers.getUsers(next);
-        const userFromRequest = req.body;
+    updateUser: async function(req, res, next) {
+        let userFromRequest = req.body;
         const userId = Number(req.params.id);
 
-        //Searches for userIndex. If userIndex === -1 means user wasn't found.
-        const userIndex = findUserById(users, userId);
-        if(userIndex < 0)
-        {
-            return res.status(404).json({error: true, msg: "User does not exists."})
-        }
+        try {
 
-        // Se hashea la contraseña
-        userFromRequest.password = bcrypt.hashSync(userFromRequest.password, 10);
-        
-        users[userIndex] = {id: userId, ...userFromRequest};
-        fileHelpers.guardarUsers(users, next);
-        return res.status(200).json({error: false, msg: "User updated successfully", data:getUserWithoutPassword(userFromRequest)});
+            if(userFromRequest.password)
+                {userFromRequest.password = await bcrypt.hash(userFromRequest.password, 10);}
+
+            let result = await db.User.update(
+                {
+                    first_name: userFromRequest.firstname, 
+                    last_name: userFromRequest.lastname, 
+                    username: userFromRequest.username, 
+                    password: userFromRequest.password, 
+                    email: userFromRequest.email, 
+                    role: userFromRequest.role,
+                    profilepic: userFromRequest.profilepic? userFromRequest.profilepic : null
+                },
+                {where: {user_id: userId}}
+            );
+
+            if(result[0] === 0){ return res.status(404).json({error: true, msg: "User does not exists."}) }
+
+            const user = await db.User.findByPk(
+                userId, 
+                {
+                    attributes: {exclude: ['password']}
+                }
+            );
+            
+            res.status(200).json({error: false, msg: "User updated successfully", data: user});
+
+        } catch (error) {
+            next(error)
+        }
     },
 
-    deleteUser: function(req, res,next) {
-        let users = fileHelpers.getUsers(next);
+    deleteUser: async function(req, res,next) {
         const userId = Number(req.params.id);
 
-        //Searches for userIndex. If userIndex === -1 means user wasn't found.
-        const userIndex = findUserById(users, userId);
-        if(userIndex < 0) {return res.status(404).json({error: true, msg: "User does not exists."});}
+        try {
+            const user = await db.User.findByPk(
+                userId, 
+                {
+                    attributes: {exclude: ['password']}
+                }
+            );
 
-        //Shifts elements back from element to delete to end and pops last element
-        const userToDelete = users[userIndex];
-        for(let i = userIndex; i < users.length - 1; i++)
-        {
-            users[i] = users[i + 1];
+            if(!user) {return res.status(404).json({error: true, msg: "User does not exists."});}
+
+            await db.Cart.destroy({
+                where: {user_id: userId}
+            });
+            
+            await db.User.destroy({
+                where: {user_id: userId}
+            });
+
+            return res.status(200).json({error: false, msg:"User deleted successfully", data: user});
+            
+
+        } catch (error) {
+            next(error);
         }
-        users.pop();
-
-        fileHelpers.guardarUsers(users, next);
-        return res.status(200).json({error: false, msg:"User deleted successfully", data: getUserWithoutPassword(userToDelete)});
     }
 }
 
