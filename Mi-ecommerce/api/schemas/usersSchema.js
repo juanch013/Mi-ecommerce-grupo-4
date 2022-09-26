@@ -51,12 +51,12 @@ const role = joi.string().valid('god', 'user', 'guest').messages({
 	'any.only': 'Role must be either god, user or guest',
 });
 
-const cart = joi.array().items(joi.number().integer().min(1)).messages({
-	'array.base': 'Cart must be an array',
-	'number.base': 'Cart items must be numbers',
-	'number.integer': 'Cart items must be integers',
-	'number.min': 'Cart items must be greater than 0',
-});
+// const cart = joi.array().items(joi.number().integer().min(1)).messages({
+// 	'array.base': 'Cart must be an array',
+// 	'number.base': 'Cart items must be numbers',
+// 	'number.integer': 'Cart items must be integers',
+// 	'number.min': 'Cart items must be greater than 0',
+// });
 
 const createAndUpdateUserSchema = joi.object({
 	email: email.required().messages({ 'any.required': 'Email is required' }),
@@ -74,7 +74,7 @@ const createAndUpdateUserSchema = joi.object({
 		.messages({ 'any.required': 'Lastname is required' }),
 	profilepic: profilepic,
 	role: role.required().messages({ 'any.required': 'Role is required' }),
-	cart: cart.required().messages({ 'any.required': 'Cart is required' }),
+	//cart: cart.required().messages({ 'any.required': 'Cart is required' }),
 });
 
 const loginSchema = joi.object({
