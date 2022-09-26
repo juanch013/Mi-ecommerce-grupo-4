@@ -5,8 +5,6 @@ const { sequelize } = require('./api/database/models');
 
 const route = express.Router();
 
-// Carga de jsons
-const users = require('./api/data.json/user.json');
 
 const db = require('./api/database/models');
 const usersRoutes = require('./api/routes/usersRoutes');
@@ -15,6 +13,7 @@ const picturesRoutes = require('./api/routes/picturesRoutes');
 const cartsRoutes = require('./api/routes/cartRoutes');
 const categoryRoutes = require('./api/routes/categoryRoutes');
 const usersController = require('./api/controllers/usersController');
+const cargarDatosRoutes = require('./api/routes/cargarDatosRoutes');
 
 //Swagger
 const swaggerUi = require('swagger-ui-express');
@@ -39,6 +38,7 @@ route.use('/products', productsRoutes);
 route.use('/pictures', picturesRoutes);
 route.use('/carts', cartsRoutes);
 route.use('/category', categoryRoutes);
+route.use('/cargar',cargarDatosRoutes),
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
@@ -46,20 +46,10 @@ app.use(logErrors);
 app.use(clientErrorHandler);
 
 app.listen(process.env.PORT, () => {
-	sequelize.sync({ force: true }).then(async () => {
 
-		for await (let u of users) {
-			await db.User.create({
-				first_name: u.first_name,
-				last_name: u.last_name,
-				username: u.username,
-				email: u.email,
-				password: u.password,
-				role: u.role,
-				profilpic: u.profilepic,
-			});
-		}
-    
-	});
+	sequelize.sync(
+		{ force: true }
+		);
+
 	console.log(`Servidor corriendo en el puerto ${process.env.PORT}`);
 });
