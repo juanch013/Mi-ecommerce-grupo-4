@@ -2,6 +2,7 @@ const { Op } = require('sequelize');
 const fileHelpers = require('../../helpers/filesHelpers');
 const db = require('../database/models');
 const Picture = require('../database/models/Picture');
+const socket = require('../../socket').socket;
 
 
 const productsController = {
@@ -48,6 +49,9 @@ const productsController = {
                     }
                 ]
             });
+
+            //emitir un mensaje de que hay ofertas disponibles
+            socket.io.emit('ofertas', {msg: "Hay ofertas disponibles"});
     
             return res.status(200).json({
                         error:false,

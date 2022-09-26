@@ -12,7 +12,7 @@ const {
 const { idByParamsSchema } = require('../schemas/genericSchema');
 const validatorHandler = require('../middlewares/validatorHandler');
 
-router.use(verifyJWT);
+// router.use(verifyJWT);
 
 router.get('/', 
 validatorHandler(categoryPoductSchema,'query'),
