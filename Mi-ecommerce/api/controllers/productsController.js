@@ -243,7 +243,8 @@ const productsController = {
                     include:[
                         [sequelize.col('Category.category_name'),'category_name']
                     ]
-                },
+                }
+                ,
                 include:[
                     {association:'gallery'},
                     {
