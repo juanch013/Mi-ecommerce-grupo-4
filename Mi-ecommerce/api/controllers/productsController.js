@@ -238,10 +238,12 @@ const productsController = {
             }
 
             let prod = await db.Product.findByPk(id,{
-                exclude:['category_id'],
-                include:[
-                    [sequelize.col('Category.category_name'),'category_name']
-                ],
+                attributes:{
+                    exclude:['category_id'],
+                    include:[
+                        [sequelize.col('Category.category_name'),'category_name']
+                    ]
+                },
                 include:[
                     {association:'gallery'},
                     {
