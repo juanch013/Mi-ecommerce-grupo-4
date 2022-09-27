@@ -1,5 +1,6 @@
 const { Op } = require('sequelize');
 const fileHelpers = require('../../helpers/filesHelpers');
+const { Sequelize } = require('../database/models');
 const db = require('../database/models');
 const Picture = require('../database/models/Picture');
 
@@ -15,7 +16,7 @@ const productsController = {
                 let products = await db.Product.findAll({
                     include:[
                         {
-                            association:"productcategoria",
+                            association:"category",
                             attributes:{exclude:['category_id','category_name']},
                             where:{
                                 category_id:category
@@ -44,11 +45,20 @@ const productsController = {
             }else{
     
                 let products = await db.Product.findAll({
+                    attributes:{   
+                            // include: Sequelize.col[('category.category_name'),'category_name'],
+                            exclude:['category_id']
+                    },
                     include:[
                         {
                             association:"gallery",
                             as:"gallery"
-                        }
+                        },
+                        {
+                            raw:true,
+                            association:"category",
+                            attributes:['category_name']
+                        }   
                     ]
                 });
         
@@ -184,23 +194,37 @@ const productsController = {
                 })
             }
 
+            let prod = await db.Product.findByPk(id,{
+                include:[
+                    {association:'gallery'}
+                ]});
+
+            if(prod == undefined){
+                return res.status(404).json({
+                    error: true,
+                    msg:"Product not found"
+                })
+            }
+
+
             let n = await db.Product.destroy({
                         where:{
                             product_id:id
                         }
                     });
             
-            if(n == 0){
-                return res.status(404).json({
-                            error: true,
-                            msg:"Product not found"
-                        })
-            }
+            // if(n == 0){
+            //     return res.status(404).json({
+            //                 error: true,
+            //                 msg:"Product not found"
+            //             })
+            // }
     
     
             return res.status(200).json({
                         error: false,
-                        msg:"Product deleted"
+                        msg:"Product deleted",
+                        data:prod
                     })
             
         } catch (error) {
@@ -214,6 +238,9 @@ const productsController = {
             const {q} = req.query; 
     
             let productsFiltrados = await db.Product.findAll({
+                attributes:{
+                    exclude:['category_id']
+                },
                 where:{
                     [Op.or]:[
                         {title:{
@@ -231,6 +258,8 @@ const productsController = {
                         as:"gallery"
                     }
                 ]
+
+
             })
     
             return res.status(200).json({
