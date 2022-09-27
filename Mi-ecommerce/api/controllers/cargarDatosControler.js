@@ -38,7 +38,7 @@ const cargarDatosController = {
           category_name: category.category_name
         })
       }
-  
+      //listar productos
       for await (let product of products) {
         await db.Product.upsert({
           price: product.price,
