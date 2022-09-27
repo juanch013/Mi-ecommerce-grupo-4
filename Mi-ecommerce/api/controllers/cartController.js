@@ -9,7 +9,6 @@ const id = req.params.id
 if(req.newUsers.user_id == id || role === 'god' || role === 'admin'){
     try {
         const cartExists = await db.Cart.findByPk(id)
-
         if(!cartExists){
             return res.status(404).json({
                 error: true,
@@ -19,7 +18,9 @@ if(req.newUsers.user_id == id || role === 'god' || role === 'admin'){
         const cartUsuario = await db.cart_product.findAll({
             where: {
                 cart_id: id
-            }
+            },
+            attributes: ['product_id', 'quantity', 'createdAt', 'updatedAt']
+
         })
         return res.status(200).json({
             error: false,
@@ -123,7 +124,7 @@ const cartEdit = async (req,res,next) => {
                     where:{
                         'cart_id': id
                     },
-                    includes: ['product_id', 'quantity']
+                    attributes: ['product_id', 'quantity', 'createdAt', 'updatedAt']
                 })
                 res.status(200).json({
                     error: false,

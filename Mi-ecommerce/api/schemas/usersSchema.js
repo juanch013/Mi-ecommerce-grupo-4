@@ -46,7 +46,7 @@ const profilepic = joi.string().messages({
 	'string.base': 'Profile picture must be a string',
 });
 
-const role = joi.string().valid('god', 'user', 'guest').messages({
+const role = joi.string().valid('god', 'admin', 'guest').messages({
 	'string.base': 'Role must be a string',
 	'any.only': 'Role must be either god, user or guest',
 });

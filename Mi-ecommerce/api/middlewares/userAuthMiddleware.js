@@ -22,9 +22,22 @@ const userAuthMiddleware = {
     },
 
     updateUser: function (req, res, next) {
-        const role = req.newUsers.role;
-        const id = req.newUsers.id;
-        if(role === "god" || id === Number(req.params.id)) {return next();}
+        const roleLoggedUser = req.newUsers.role;
+        const idLoggedUser = req.newUsers.id;
+        const roleUpdate = req.body.role;
+        const idUpdate = Number(req.params.id);
+
+        if(roleLoggedUser === "god") {return next();}
+        
+        if(idLoggedUser === idUpdate)
+        {
+            if(roleLoggedUser === "admin" && 
+              (roleUpdate === "admin" || roleUpdate === "guest"))
+              {next();}
+            if(roleLoggedUser === "guest" && 
+              roleUpdate === "guest")
+              {next();}
+        }
         res.status(403).json("msg: Not authorized");
     },
 

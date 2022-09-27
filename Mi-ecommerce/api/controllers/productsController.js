@@ -1,5 +1,7 @@
+const { raw } = require('express');
 const { Op } = require('sequelize');
 const fileHelpers = require('../../helpers/filesHelpers');
+const { Sequelize, sequelize } = require('../database/models');
 const db = require('../database/models');
 const Picture = require('../database/models/Picture');
 
@@ -13,16 +15,24 @@ const productsController = {
             if(category){
     
                 let products = await db.Product.findAll({
+                    attributes:{   
+                        exclude:['category_id'],
+                        include:[
+                            [sequelize.col('Category.category_name'),'category_name']
+                        ]
+                    },
                     include:[
                         {
-                            association:"productcategoria",
-                            attributes:{exclude:['category_id','category_name']},
+                            model: db.Category,
+                            as:'category',
+                            attributes:[],
                             where:{
                                 category_id:category
                             },
                         },
                         {
-                            association:'gallery'
+                            association:'gallery',
+                            as:"gallery"
                         }
                     ]
                 })
@@ -44,11 +54,23 @@ const productsController = {
             }else{
     
                 let products = await db.Product.findAll({
+                    // raw:true,
+                    attributes:{   
+                            exclude:['category_id'],
+                            include:[
+                                [sequelize.col('Category.category_name'),'category_name']   
+                            ]
+                    },
                     include:[
                         {
                             association:"gallery",
                             as:"gallery"
-                        }
+                        },
+                        {
+                            model: db.Category,
+                            as:'category',
+                            attributes:[]
+                        } 
                     ]
                 });
         
@@ -70,11 +92,22 @@ const productsController = {
        try {
            const {id} = req.params;
            let prod = await db.Product.findByPk(id,{
+                attributes:{   
+                    exclude:['category_id'],
+                    include:[
+                        [sequelize.col('Category.category_name'),'category_name']
+                    ]
+                },
                include:[
                    {
                        association:"gallery",
                        as:"gallery"
-                   }
+                   },
+                   {
+                    model: db.Category,
+                    as:"category",
+                    attributes:[]
+                } 
                ]
            });
            if(!prod){
@@ -99,6 +132,12 @@ const productsController = {
     mostwanted: async (req, res, next)=>{
         try {
             let products = await db.Product.findAll({
+                attributes:{   
+                    exclude:['category_id'],
+                    include:[
+                        [sequelize.col('Category.category_name'),'category_name']
+                    ]
+                },
                 where:{
                     mostwanted:true
                 },
@@ -106,6 +145,11 @@ const productsController = {
                     {
                         association:"gallery",
                         as:"gallery"
+                    },
+                    {
+                        model: db.Category,
+                        as:"category",
+                        attributes:[]
                     }
                 ]
             })
@@ -135,22 +179,31 @@ const productsController = {
                     msg:"You don't have permission to create a product"
                 })
             }
+
+            let cat = await db.Category.findByPk(category);
+
+            if(!cat){
+                return res.status(404).json({
+                    error: true,
+                    msg:`category with id = ${category} not found`
+                })
+            }
     
             const newProduct = {
                 title: title,
-                description: description,
+                description: description == undefined? "" : description,
                 price: price == undefined? 0 : price,
                 stock: stock == undefined? 0 : stock,
                 mostwanted:mostwanted == undefined? 0 : mostwanted,
                 category_id:category
             }
     
-            db.Product.create(newProduct);
+            let prod = await db.Product.create(newProduct);
     
              return res.status(201).json({
                  error:false,
                  msg:"Product created",
-                 data: newProduct
+                 data: prod
              })
             
         } catch (error) {
@@ -184,23 +237,46 @@ const productsController = {
                 })
             }
 
+            let prod = await db.Product.findByPk(id,{
+                exclude:['category_id'],
+                include:[
+                    [sequelize.col('Category.category_name'),'category_name']
+                ],
+                include:[
+                    {association:'gallery'},
+                    {
+                        model:db.Category,
+                        as:'category',
+                        attributes:[]
+                    }
+                ]});
+
+            if(prod == undefined){
+                return res.status(404).json({
+                    error: true,
+                    msg:"Product not found"
+                })
+            }
+
+
             let n = await db.Product.destroy({
                         where:{
                             product_id:id
                         }
                     });
             
-            if(n == 0){
-                return res.status(404).json({
-                            error: true,
-                            msg:"Product not found"
-                        })
-            }
+            // if(n == 0){
+            //     return res.status(404).json({
+            //                 error: true,
+            //                 msg:"Product not found"
+            //             })
+            // }
     
     
             return res.status(200).json({
                         error: false,
-                        msg:"Product deleted"
+                        msg:"Product deleted",
+                        data:prod
                     })
             
         } catch (error) {
@@ -214,6 +290,12 @@ const productsController = {
             const {q} = req.query; 
     
             let productsFiltrados = await db.Product.findAll({
+                attributes:{
+                    exclude:['category_id'],
+                    include:[
+                        [sequelize.col('Category.category_name'),'category_name']
+                    ]
+                },
                 where:{
                     [Op.or]:[
                         {title:{
@@ -229,8 +311,15 @@ const productsController = {
                     {
                         association:"gallery",
                         as:"gallery"
+                    },
+                    {
+                        model: db.Category,
+                        as:"category",
+                        attributes:[]
                     }
                 ]
+
+
             })
     
             return res.status(200).json({
@@ -288,10 +377,31 @@ const productsController = {
                     product_id : id
                 }
             })
+
+            let selectProdMod = await db.Product.findByPk(id,{
+                attributes:{   
+                    exclude:['category_id'],
+                    include:[
+                        [sequelize.col('Category.category_name'),'category_name']
+                    ]
+                },
+               include:[
+                   {
+                       association:"gallery",
+                       as:"gallery"
+                   },
+                   {
+                    model: db.Category,
+                    as:"category",
+                    attributes:[]
+                } 
+               ]
+            });
+
             return res.status(200).json({
                 error: false,
                 msg:"Product modified",
-                data:prodModificado
+                data:selectProdMod
             })
 
         } catch (error) {
@@ -344,12 +454,23 @@ const productsController = {
             const {category} = req.query;
     
            let products = db.Product.findAll({
+                attributes:{
+                    exclude:['category_id'],
+                    include:[
+                        [sequelize.col('Category.category_name'),'category_name']
+                    ]
+                },
                 where:{
                     category_id:category
                 },
                 include:[
                     {
                         association:"gallery",
+                    },
+                    {
+                        model:db.Category,
+                        as:"category",
+                        attributes:[]
                     }
                 ]
            })
@@ -373,8 +494,7 @@ const productsController = {
 
 
         
-    },
-
+    }
 }
 
 module.exports = productsController;
