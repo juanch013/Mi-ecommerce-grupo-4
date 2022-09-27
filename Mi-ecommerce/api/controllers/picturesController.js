@@ -162,15 +162,13 @@ const deletePicture = async (req, res, next) => {
 			return res.status(404).json({ error: true, msg: 'Picture not found' });
 		}
 
-		await db.Picture.destroy({
+		const pictureDeleted = await db.Picture.destroy({
 			where: {
 				picture_id: pictureId,
 			},
 		});
 
-    pictureExist = await db.Picture.findByPk(pictureId);
-
-    if (pictureExist) {
+    if (!pictureDeleted) {
       return res.status(400).json({ error: true, msg: 'Picture not deleted' });
     }
 

@@ -21,6 +21,9 @@ tags:
     description: Todos los endpoints de productos
   - name: pictures
     description: Todos los endpoints de pictures
+  - name: cart
+    description: Todos los endpoints de carrito de usuario
+
 
 components:
   securitySchemes:
@@ -145,8 +148,10 @@ paths:
               properties:
                 pictureUrl:
                   type: string
-                productDescription:
+                  example: http://www.google.com.uy
+                pictureDescription:
                   type: string
+                  example: ESTA ES UNA IMAGENE MODIFICADA
 
       responses:
         "200":
@@ -160,7 +165,7 @@ paths:
                     type: number
                   picture_url:
                     type: string
-                  dpicture_description:
+                  picture_description:
                     type: string
                   product_id:
                     type: number
@@ -190,7 +195,7 @@ paths:
                     type: string
                   msg:
                     type: string
-                    example: Producto no encontrado
+                    example: Picture not found
 
         "401":
           description: No tiene autorizacion para acceder a este recurso
@@ -204,7 +209,7 @@ paths:
                     example: true
                   msg:
                     type: string
-                    example: No esta autorizado para acceder a este recurso
+                    example: You are not authorized to access this resource
 
         "500":
           description: Server Error
@@ -289,7 +294,7 @@ paths:
                     example: true
                   msg:
                     type: string
-                    example: Producto no encontrado
+                    example: Picture not found
 
         "401":
           description: No tiene autorizacion para acceder a este recurso
@@ -362,7 +367,7 @@ paths:
                     example: true
                   msg:
                     type: string
-                    example: Producto no encontrado
+                    example: Picture not found
 
         "401":
           description: No tiene autorizacion para acceder a este recurso
@@ -377,6 +382,19 @@ paths:
                   msg:
                     type: string
                     example: No esta autorizado para acceder a este recurso
+        
+        "500":
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  msg:
+                    type: string
 
       parameters:
         - name: id
@@ -405,10 +423,13 @@ paths:
               properties:
                 pictureUrl:
                   type: string
-                productDescription:
+                  example: http://www.google.com
+                pictureDescription:
                   type: string
+                  example: Creando una imagen de prueba
                 productId:
                   type: number
+                  example: 1
       responses:
         "201":
           description: Picture creada correctamente
@@ -417,14 +438,13 @@ paths:
               schema:
                 type: object
                 properties:
-                  picture_id:
-                    type: number
                   picture_url:
                     type: string
                   picture_description:
                     type: string
                   product_id:
                     type: number
+              
 
         "400":
           description: Parametro de entrada no es correcto
