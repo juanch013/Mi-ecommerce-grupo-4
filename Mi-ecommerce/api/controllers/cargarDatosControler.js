@@ -55,14 +55,15 @@ const cargarDatosController = {
           picture_url: picture.url,
           product_id: picture.productId
         })
-      } /*
+      } 
+      
+      /*
       //carga productos en carritos
       for await (let cproduct of cartProducts){
-        await db.CartProduct.upsert({
+        await db.CartProduct.create({
           cart_id: cproduct.cart_id,
           product_id: cproduct.product_id,
-          quantity: cproduct.quantity,
-          createdAt: "MOW()"
+          quantity: cproduct.quantity
         })
       } */
         res.status(200).json({
