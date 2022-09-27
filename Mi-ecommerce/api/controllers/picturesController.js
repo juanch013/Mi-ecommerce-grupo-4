@@ -156,7 +156,7 @@ const deletePicture = async (req, res, next) => {
 	try {
 		const pictureId = req.params.id;
 
-		const pictureExist = await db.Picture.findByPk(pictureId);
+		let pictureExist = await db.Picture.findByPk(pictureId);
 
 		if (!pictureExist) {
 			return res.status(404).json({ error: true, msg: 'Picture not found' });

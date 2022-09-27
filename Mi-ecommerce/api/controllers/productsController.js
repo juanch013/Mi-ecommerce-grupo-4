@@ -1,3 +1,4 @@
+const { raw } = require('express');
 const { Op } = require('sequelize');
 const fileHelpers = require('../../helpers/filesHelpers');
 const { Sequelize } = require('../database/models');
@@ -14,10 +15,13 @@ const productsController = {
             if(category){
     
                 let products = await db.Product.findAll({
+                    attributes:{   
+                        exclude:['category_id']
+                    },
                     include:[
                         {
                             association:"category",
-                            attributes:{exclude:['category_id','category_name']},
+                            attributes:{exclude:['category_id']},
                             where:{
                                 category_id:category
                             },
@@ -45,8 +49,8 @@ const productsController = {
             }else{
     
                 let products = await db.Product.findAll({
+                    nest:true,
                     attributes:{   
-                            // include: Sequelize.col[('category.category_name'),'category_name'],
                             exclude:['category_id']
                     },
                     include:[
@@ -55,10 +59,9 @@ const productsController = {
                             as:"gallery"
                         },
                         {
-                            raw:true,
                             association:"category",
                             attributes:['category_name']
-                        }   
+                        } 
                     ]
                 });
         
@@ -80,11 +83,18 @@ const productsController = {
        try {
            const {id} = req.params;
            let prod = await db.Product.findByPk(id,{
+                attributes:{   
+                    exclude:['category_id']
+                },
                include:[
                    {
                        association:"gallery",
                        as:"gallery"
-                   }
+                   },
+                   {
+                    association:"category",
+                    attributes:['category_name']
+                } 
                ]
            });
            if(!prod){
@@ -109,6 +119,9 @@ const productsController = {
     mostwanted: async (req, res, next)=>{
         try {
             let products = await db.Product.findAll({
+                attributes:{   
+                    exclude:['category_id']
+                },
                 where:{
                     mostwanted:true
                 },
@@ -116,6 +129,10 @@ const productsController = {
                     {
                         association:"gallery",
                         as:"gallery"
+                    },
+                    {
+                        association:'category',
+                        attributes:['category_name']
                     }
                 ]
             })
@@ -148,19 +165,19 @@ const productsController = {
     
             const newProduct = {
                 title: title,
-                description: description,
+                description: description == undefined? "" : description,
                 price: price == undefined? 0 : price,
                 stock: stock == undefined? 0 : stock,
                 mostwanted:mostwanted == undefined? 0 : mostwanted,
                 category_id:category
             }
     
-            db.Product.create(newProduct);
+            let prod = await db.Product.create(newProduct);
     
              return res.status(201).json({
                  error:false,
                  msg:"Product created",
-                 data: newProduct
+                 data: prod
              })
             
         } catch (error) {
@@ -195,8 +212,13 @@ const productsController = {
             }
 
             let prod = await db.Product.findByPk(id,{
+                exclude:['category_id'],
                 include:[
-                    {association:'gallery'}
+                    {association:'gallery'},
+                    {
+                        association:'category',
+                        attributes:['category_name']
+                    }
                 ]});
 
             if(prod == undefined){
@@ -256,6 +278,10 @@ const productsController = {
                     {
                         association:"gallery",
                         as:"gallery"
+                    },
+                    {
+                        association:"category",
+                        attributes:['category_name']
                     }
                 ]
 
@@ -373,12 +399,17 @@ const productsController = {
             const {category} = req.query;
     
            let products = db.Product.findAll({
+                attributes:{exclude:['category_id']},
                 where:{
                     category_id:category
                 },
                 include:[
                     {
                         association:"gallery",
+                    },
+                    {
+                        association:'category',
+                        attributes:['category_name']
                     }
                 ]
            })

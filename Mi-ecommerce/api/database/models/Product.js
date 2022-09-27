@@ -66,7 +66,8 @@ const Product = (sequelize, DataType)=>{
 
             Product.belongsTo(models.Category,{
                 as:"category",
-                foreignKey:"category_id"
+                foreignKey:"category_id",
+                onDelete:"SET NULL"
             })
         }
     return Product;

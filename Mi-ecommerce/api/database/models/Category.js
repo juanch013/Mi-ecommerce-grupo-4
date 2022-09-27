@@ -23,6 +23,7 @@ const Category = (sequelize, DataTypes) => {
         Catergory.associate = (models) => {
             Catergory.hasMany(models.Product,{
                 foreignKey: "category_id",
+                onDelete:"SET NULL"
             })
         }
     return Catergory;

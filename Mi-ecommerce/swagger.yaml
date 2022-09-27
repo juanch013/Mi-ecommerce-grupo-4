@@ -1414,8 +1414,11 @@ paths:
                                 type: string
                               product_id:
                                 type: number
-                        category_id:
-                          type: number
+                        category:
+                          type: object
+                          properties:
+                            category_name: 
+                              type: string
                         mostwanted:
                           type: boolean
                         stock:
@@ -1522,7 +1525,7 @@ paths:
                   data:
                     type: object
                     properties:
-                      id:
+                      product_id:
                         type: number
                       title:
                         type: string
@@ -1530,8 +1533,11 @@ paths:
                         type: number
                       description:
                         type: string
-                      category_id:
-                        type: number
+                      category:
+                          type: object
+                          properties:
+                            category_name: 
+                              type: string
                       mostwanted:
                         type: boolean
                       stock:
@@ -1655,7 +1661,7 @@ paths:
                   data: 
                     type: object
                     properties:
-                      id:
+                      product_id:
                         type: number
                       title:
                         type: string
@@ -1676,8 +1682,11 @@ paths:
                               type: string
                             product_id:
                               type: number
-                      category_id:
-                        type: number
+                      category:
+                          type: object
+                          properties:
+                            category_name: 
+                              type: string
                       mostwanted:
                         type: boolean
                       stock:
@@ -1731,7 +1740,7 @@ paths:
                   data:
                     type: object
                     properties:
-                      id:
+                      product_id:
                         type: number
                       title:
                         type: string
@@ -1752,8 +1761,11 @@ paths:
                               type: string
                             product_id:
                               type: number
-                      category_id:
-                        type: number
+                      category:
+                          type: object
+                          properties:
+                            category_name: 
+                              type: string
                       mostwanted:
                         type: boolean
                       stock:
@@ -1856,7 +1868,7 @@ paths:
                   data:
                     type: object
                     properties:
-                      id:
+                      product_id:
                         type: number
                       title:
                         type: string
@@ -1877,8 +1889,11 @@ paths:
                               type: string
                             product_id:
                               type: number
-                      category_id:
-                        type: number
+                      category:
+                          type: object
+                          properties:
+                            category_name: 
+                              type: string
                       mostwanted:
                         type: boolean
                       stock:
@@ -1922,7 +1937,7 @@ paths:
                     items:
                       type: object
                       properties:
-                        id:
+                        product_id:
                           type: number
                         title:
                           type: string
@@ -1943,8 +1958,11 @@ paths:
                                 type: string
                               product_id:
                                 type: number
-                        category_id:
-                          type: number
+                        category:
+                          type: object
+                          properties:
+                            category_name: 
+                              type: string
                         mostwanted:
                           type: boolean
                         stock:
@@ -1998,7 +2016,7 @@ paths:
                     items:
                       type: object
                       properties:
-                        id:
+                        product_id:
                           type: number
                         title:
                           type: string
@@ -2019,8 +2037,11 @@ paths:
                                 type: string
                               product_id:
                                 type: number
-                        category_id:
-                          type: number
+                        category:
+                          type: object
+                          properties:
+                            category_name: 
+                              type: string
                         mostwanted:
                           type: boolean
                         stock:
