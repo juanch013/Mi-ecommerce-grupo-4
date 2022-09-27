@@ -4,6 +4,7 @@ const users = require('../data.json/user.json');
 const products = require('../data.json/products.json');
 const categories = require('../data.json/categories.json');
 const pictures = require('../data.json/pictures.json')
+const cartProducts = require('../data.json/cartProduct.json');
 
 const cargarDatosController = {
 //carga
@@ -47,15 +48,23 @@ const cargarDatosController = {
           mostwanted: product.mostwanted,
           category: product.category
         })
-      }
-
+      } 
+      //carga picture
       for await (let picture of pictures) {
-        await db.Picture.upsert({
+        await db.Picture.create({
           picture_url: picture.url,
           product_id: picture.productId
         })
-      }
-
+      } /*
+      //carga productos en carritos
+      for await (let cproduct of cartProducts){
+        await db.CartProduct.upsert({
+          cart_id: cproduct.cart_id,
+          product_id: cproduct.product_id,
+          quantity: cproduct.quantity,
+          createdAt: "MOW()"
+        })
+      } */
         res.status(200).json({
             error:false,
             msg: "Se cargaron los datos exitosamente",
