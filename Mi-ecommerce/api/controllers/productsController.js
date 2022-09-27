@@ -240,7 +240,8 @@ const productsController = {
             let prod = await db.Product.findByPk(id,{
                 attributes:{
                     exclude:['category_id'],
-                    include:[[sequelize.col('Category.category_name'),'category_name']]
+                    include:[
+                        [sequelize.col('Category.category_name'),'category_name']]
                 }
                 ,
                 include:[
