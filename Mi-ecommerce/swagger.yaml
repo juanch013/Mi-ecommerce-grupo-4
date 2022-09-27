@@ -19,8 +19,6 @@ tags:
     description: Todos los endpoints de productos
   - name: login
     description: Todos los endpoints de productos
-  - name: carito
-    description: Todos los endpoints de carito
   - name: pictures
     description: Todos los endpoints de pictures
 
