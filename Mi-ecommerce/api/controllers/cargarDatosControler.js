@@ -4,6 +4,7 @@ const users = require('../../api/data.json/user.json');
 const products = require('../../api/data.json/products.json');
 const categories = require('../../api/data.json/categories.json');
 const cargarDatosController = {
+//carga
     carga: async function(req,res){
         //cargar usuarios
         for await (let u of users) {
