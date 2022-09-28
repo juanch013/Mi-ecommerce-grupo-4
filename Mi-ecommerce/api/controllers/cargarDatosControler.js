@@ -9,6 +9,7 @@ const pictures = require('../data.json/pictures.json');
 const cartProducts = require('../data.json/cartProduct.json');
 
 const cargarDatosController = {
+
 	//carga
 	carga: async function (req, res) {
 		try {
