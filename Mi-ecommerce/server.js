@@ -17,7 +17,6 @@ const {
 
 
 
-const db = require('./api/database/models');
 const usersRoutes = require('./api/routes/usersRoutes');
 const productsRoutes = require('./api/routes/productsRoutes');
 const picturesRoutes = require('./api/routes/picturesRoutes');

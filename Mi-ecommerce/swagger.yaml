@@ -13,12 +13,14 @@ servers:
     description: Entorno Desarrollo
 
 tags:
+  - name: load
+    description: Todos los endpoints de carga de datos
+  - name: login
+    description: Endpoint del login
   - name: users
     description: Todos los endpoints de usuarios
   - name: products
     description: Todos los endpoints de productos
-  - name: login
-    description: Endpoint del login
   - name: pictures
     description: Todos los endpoints de pictures
   - name: cart
@@ -35,6 +37,41 @@ components:
 
 paths:
 
+  /cargar:
+    post:
+      tags:
+        - load
+      summary: Carga de datos iniciales de la API, no recibe ningun parametro solo ejecutar.
+
+      responses:
+        "500":
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  msg:
+                    type: string
+                    example: Server Error
+                    
+        "201":
+          description: Data cargada a la base de datos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: false
+                  msg:
+                    type: string
+                    example: Se cargaron los datos exitosamente
+  
   /pictures?product=id:
     get:
       security:
@@ -1524,7 +1561,7 @@ paths:
                 description:
                   type: string
                   example: "La mejor Macbook del mercado"
-                category_id:
+                category:
                   type: number
                   example: 2
                 mostwanted:
@@ -1850,16 +1887,22 @@ paths:
               properties:
                 title:
                   type: string
+                  example: Producto X
                 price:
                   type: number
+                  example: 100
                 description:
                   type: string
-                category_id:
+                  example: Producto X
+                category:
                   type: number
+                  example: 1
                 mostwanted:
                   type: boolean
+                  example: false
                 stock:
                   type: number
+                  example: 10
       parameters:
         - name: id
           in: path
@@ -2355,3 +2398,4 @@ paths:
                         type: number
                       category_name:
                         type: string
+
