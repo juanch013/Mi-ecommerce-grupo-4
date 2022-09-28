@@ -180,13 +180,16 @@ const productsController = {
                 })
             }
 
-            let cat = await db.Category.findByPk(category);
+            if(category != undefined){
+                let cat = await db.Category.findByPk(category);
+    
+                if(!cat){
+                    return res.status(404).json({
+                        error: true,
+                        msg:`category with id = ${category} not found`
+                    })
+                }
 
-            if(!cat){
-                return res.status(404).json({
-                    error: true,
-                    msg:`category with id = ${category} not found`
-                })
             }
     
             const newProduct = {
@@ -195,7 +198,7 @@ const productsController = {
                 price: price == undefined? 0 : price,
                 stock: stock == undefined? 0 : stock,
                 mostwanted:mostwanted == undefined? 0 : mostwanted,
-                category_id:category
+                category_id:category == undefined? null : category
             }
     
             let prod = await db.Product.create(newProduct);
