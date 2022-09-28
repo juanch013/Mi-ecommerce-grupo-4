@@ -15,10 +15,6 @@ const {
 } = require('./api/middlewares/errorHandler');
 
 
-// Carga de jsons
-const users = require('./api/data.json/user.json')
-const products = require('./api/data.json/products.json')
-const categories = require('./api/data.json/categories.json')
 
 
 const db = require('./api/database/models');
@@ -54,7 +50,7 @@ app.use(clientErrorHandler);
 
 app.listen(process.env.PORT, () => {
 	sequelize.sync(
-		 //{ force: true } 
+		 { force: false } 
 		);
 
 	console.log(`Servidor corriendo en el puerto ${process.env.PORT}`);
