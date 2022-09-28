@@ -4,15 +4,16 @@ const userAuthMiddleware = {
     listUsers: function (req, res, next) {
         const role = req.newUsers.role;
         if(role === "admin" || role === "god") {return next();}
-        res.status(403).json("msg: Not authorized");
+        res.status(403).json({error: true,
+                            msg: "Not authorized"});
     },
 
     getUser: function (req, res, next) {
         const role = req.newUsers.role;
         const id = req.newUsers.user_id;
-        console.log(id, " ", req.params.id)
         if(role === "admin" || role === "god" || id === Number(req.params.id)) {return next();}
-        res.status(403).json("msg: Not authorized");
+        res.status(403).json({error: true,
+                            msg: "Not authorized"});
     },
     
     createUser: function (req, res, next) {
@@ -30,11 +31,6 @@ const userAuthMiddleware = {
             const roleUpdate = req.body.role;
             const idUpdate = Number(req.params.id);
 
-            console.log(roleLoggedUser)
-            console.log(idLoggedUser)
-            console.log(roleUpdate)
-            console.log(idUpdate)
-
             if(roleLoggedUser === "god") {return next();}
             if(idLoggedUser === idUpdate)
             {
@@ -45,7 +41,8 @@ const userAuthMiddleware = {
                   roleUpdate === "guest")
                   {return next();}
             }
-            return res.status(403).json("msg: Not authorized");
+            return res.status(403).json({error: true,
+                                        msg: "Not authorized"});
         }catch{
 
         }
@@ -54,9 +51,10 @@ const userAuthMiddleware = {
 
     deleteUser: function (req, res, next) {
         const role = req.newUsers.role;
-        const id = req.newUsers.id;
+        const id = req.newUsers.user_id;
         if(role === "god" || id === Number(req.params.id)) {return next();}
-        res.status(403).json("msg: Not authorized");
+        res.status(403).json({error: true,
+                            msg: "Not authorized"});
     }
 }
 

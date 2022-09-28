@@ -57,7 +57,8 @@ const usersController = {
                 {
                     where: 
                     {
-                        [Op.or]: [{username: userFromRequest.username}, {email: userFromRequest.email}]
+                        [Op.or]: [{username: userFromRequest.username}, 
+                                  {email: userFromRequest.email}]
                     }
                 }
             )
@@ -152,6 +153,40 @@ const usersController = {
         const userId = Number(req.params.id);
 
         try {
+
+            const userFound = await db.User.findOne(
+                {
+                    where: 
+                    {
+                        [Op.and]: [
+                            {
+                                user_id: {[Op.ne]: userId}
+                            },
+                            {
+                                [Op.or]: [{username: userFromRequest.username}, 
+                                        {email: userFromRequest.email}]
+                            }
+                        ]
+                    }
+                }
+            )
+            if(userFound)
+            {
+                if(userFound.username === userFromRequest.username)
+                {
+                    return res.status(400).json({
+                        error: true,
+                        msg: "Username is already registred",
+                    });
+                }
+                if(userFound.email === userFromRequest.email)
+                {
+                    return res.status(400).json({
+                        error: true,
+                        msg: "E-mail is already registred",
+                    });
+                }
+            }
 
             if(userFromRequest.password)
                 {userFromRequest.password = await bcrypt.hash(userFromRequest.password, 10);}
