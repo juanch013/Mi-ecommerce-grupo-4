@@ -57,10 +57,10 @@ const cargarDatosController = {
         })
       } 
       
-      /*
+      
       //carga productos en carritos
-      for await (let cproduct of cartProducts){
-        await db.CartProduct.create({
+      /*for await (let cproduct of cartProducts){
+        await db.CartProduct.upsert({
           cart_id: cproduct.cart_id,
           product_id: cproduct.product_id,
           quantity: cproduct.quantity
