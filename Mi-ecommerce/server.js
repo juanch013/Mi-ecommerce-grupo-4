@@ -15,6 +15,10 @@ const {
 } = require('./api/middlewares/errorHandler');
 
 
+// Carga de jsons
+const users = require('./api/data.json/user.json')
+const products = require('./api/data.json/products.json')
+const categories = require('./api/data.json/categories.json')
 
 
 const usersRoutes = require('./api/routes/usersRoutes');

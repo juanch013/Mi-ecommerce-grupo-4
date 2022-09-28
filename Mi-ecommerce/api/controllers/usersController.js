@@ -3,26 +3,6 @@ const {generateJWT} = require('../../helpers/generateJWT');
 const db = require('../database/models');
 const { Op } = require('sequelize')
 
-
-//Recibe array de usuarios y un id de usuario. 
-//Retorna el indice del usuario en el array de usuarios cuyo id coincide con el parametro id recibido.
-// const findUserById = (users, id) => {
-//     let userIndex = -1;
-//     users.forEach((user, index) => {
-//         if(user.id === id)
-//         {
-//             userIndex = index;
-//         }
-//     })
-//     return userIndex;
-// }
-
-// Filters out password field from user object so it's not returned
-// const getUserWithoutPassword = (user) => {
-//     const {id, email, username, firstname, lastname, role, profilepic, cart} = user;
-//     return {id, email, username, firstname, lastname, role, profilepic, cart};
-// }
-
 const usersController = {
     listUsers: async function(req, res, next) {
 
@@ -77,7 +57,8 @@ const usersController = {
                 {
                     where: 
                     {
-                        [Op.or]: [{username: userFromRequest.username}, {email: userFromRequest.email}]
+                        [Op.or]: [{username: userFromRequest.username}, 
+                                  {email: userFromRequest.email}]
                     }
                 }
             )
@@ -172,6 +153,40 @@ const usersController = {
         const userId = Number(req.params.id);
 
         try {
+
+            const userFound = await db.User.findOne(
+                {
+                    where: 
+                    {
+                        [Op.and]: [
+                            {
+                                user_id: {[Op.ne]: userId}
+                            },
+                            {
+                                [Op.or]: [{username: userFromRequest.username}, 
+                                        {email: userFromRequest.email}]
+                            }
+                        ]
+                    }
+                }
+            )
+            if(userFound)
+            {
+                if(userFound.username === userFromRequest.username)
+                {
+                    return res.status(400).json({
+                        error: true,
+                        msg: "Username is already registred",
+                    });
+                }
+                if(userFound.email === userFromRequest.email)
+                {
+                    return res.status(400).json({
+                        error: true,
+                        msg: "E-mail is already registred",
+                    });
+                }
+            }
 
             if(userFromRequest.password)
                 {userFromRequest.password = await bcrypt.hash(userFromRequest.password, 10);}
