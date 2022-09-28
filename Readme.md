@@ -1,7 +1,6 @@
 ## Objetivos del Proyecto
 
-- Utilizando Node.js y Express desarrollar los endpoints para 
-
+- Utilizando Node.js, Express y Sequelize desarrollar los endpoints para una API de un e-commerce.
 ## Comenzando
 
 1. Instalar mysql y crear base de datos llamada `mi_ecommerce_4`.
@@ -13,16 +12,13 @@
    DB_PASS= contraseña de usuario de mysql
    DB_USER= usuario de mysql
    DB_NAME= mi_ecommerce_4
-   SECRETORPRIVATEKEY= clave secreta para la generacion de JWT(a su eleccion)
+   SECRETORPRIVATEKEY= clave secreta para la generación de JWT(a su elección)
    PORT= puerto en el que se va a escuchar
 ``` 
 
 5. Correr el servidor con `npm start`.
-6. Descomentar la linea 57 en el archivo server.js en la primera ejecucion del servidor para que 
-   cree las tablas y relaciones de la base de datos , luego volver a comentarla para que no 
-   la cree cada vez que se ejecute/levante el servidor
+6. Descomentar la línea 57 en el archivo server.js  `{ force: true }` en la primera ejecución del servidor para que cree las tablas y relaciones de la base de datos, luego volver a comentarla para que no se borren los datos cada vez que se ejecute/levante el servidor.
 
-7. realizar la carga de datos de prueba:
-   la carga de datos se puede realizar mediante una peticion post a la ruta http://localhost:3000/api/v1/cargar con el body vacio.
-   o sino a traves del swagger, corriendo la primera ruta documentada, para ingresar al swagger , ingresar a la ruta http://localhost:3000/api-docs/ por el navegador
-
+7. Realizar la carga de datos de prueba:
+La carga de datos se puede realizar mediante una petición post a la ruta http://localhost:3000/api/v1/cargar, con el body vacío. 
+Sino a través del swagger, corriendo la primera ruta documentada. Para ello debe ingresar a la ruta http://localhost:3000/api-docs/ por el navegador.
