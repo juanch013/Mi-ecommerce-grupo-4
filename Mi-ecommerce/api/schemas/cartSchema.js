@@ -6,10 +6,9 @@ const id = joi.number().integer().min(1).messages({
 	'number.min': 'Id must be a number greater than 0',
 });
 
-const quantity = joi.number().integer().min(1).messages({
+const quantity = joi.number().integer().messages({
 	'number.base': 'Quantity must be a number',
 	'number.integer': 'Quantity must be a integer',
-	'number.min': 'Quantity must be a number greater than 0',
 });
 
 const idByParamsSchema = joi.object({
