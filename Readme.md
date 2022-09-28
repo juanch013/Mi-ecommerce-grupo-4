@@ -26,6 +26,7 @@
    la carga de datos se puede realizar mediante una peticion post a la ruta http://localhost:3000/api/v1/cargar con el body vacio.
    o sino a traves del swagger, corriendo la primera ruta documentada, para ingresar al swagger , ingresar a la ruta http://localhost:3000/api-docs/ por el navegador
 
+
                       oo0oo
                      o8888888o
                      88" . "88
@@ -37,11 +38,10 @@
                / _||||| -:- |||||- \
               |   | \\\  -  /// |   |
               | \_|  ''\---/''  |_/ |
-              \  .-\__  '-'  _/-. /
-            _'. .'  /--.--\  `. .'_
-         ."" '<  `._\_<|>/__.' >' "".
-        | | :  `- \`.;`\ _ /`;.`/ - ` : | |
-        \  \ `.   \ _\ /_ _/   .-` /  /
-    =====`-._`._ \_/_.-`__.-'=====
+               \  .-\__  '-'  _/-. /
+              _'. .'  /--.--\  `. .'_
+            ."" '<  `._\_<|>/__.' >' "".
+         | | :  `- \`.;`\ _ /`;.`/ - ` : | |
+           \  \ `.   \ _\ /_ _/   .-` /  /
+          =====`-._`._ \_/_.-`__.-'=====
                       `=---='
-    ~~~~~~~~~~~~~~~
