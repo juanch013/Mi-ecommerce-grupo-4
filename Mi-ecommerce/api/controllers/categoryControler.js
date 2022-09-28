@@ -28,7 +28,7 @@ const categoryControler = {
             });
             res.status(201).json({
                 error:false,
-                msg: "Se creo la categoria",
+                msg: "Category created",
                 data:newcategory
             });
         } catch (error) {

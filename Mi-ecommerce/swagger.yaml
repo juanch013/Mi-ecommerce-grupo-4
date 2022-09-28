@@ -2129,7 +2129,7 @@ paths:
                     example: false
                   msg:
                     type: string
-                    example: busqueda exitosa
+                    example: Category List
                   data:
                     type: array
                     items:
@@ -2197,7 +2197,7 @@ paths:
                     example: false
                   msg:
                     type: string
-                    example: Categoria creada correctamente
+                    example: Category created
                   data:
                     type: object
                     properties:
@@ -2285,7 +2285,7 @@ paths:
                     example: false
                   msg:
                     type: string
-                    example: Categoria modificada correctamente
+                    example: Category update
                   data:
                     type: object
                     properties:
@@ -2347,7 +2347,7 @@ paths:
                     example: false
                   msg:
                     type: string
-                    example: Categoria eliminada correctamente
+                    example: Category delete
                   data:
                     type: object
                     properties:
