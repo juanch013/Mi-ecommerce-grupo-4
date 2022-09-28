@@ -21,7 +21,6 @@ const products = require('./api/data.json/products.json')
 const categories = require('./api/data.json/categories.json')
 
 
-const db = require('./api/database/models');
 const usersRoutes = require('./api/routes/usersRoutes');
 const productsRoutes = require('./api/routes/productsRoutes');
 const picturesRoutes = require('./api/routes/picturesRoutes');
@@ -54,7 +53,7 @@ app.use(clientErrorHandler);
 
 app.listen(process.env.PORT, () => {
 	sequelize.sync(
-		 { force: true } 
+		 //{ force: true } 
 		);
 
 	console.log(`Servidor corriendo en el puerto ${process.env.PORT}`);

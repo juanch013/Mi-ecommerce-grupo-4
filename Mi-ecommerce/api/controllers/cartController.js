@@ -105,7 +105,8 @@ const cartEdit = async (req,res,next) => {
                         quantity: newQuantity 
                     },{
                         where: {
-                            'product_id': newProduct.id
+                            'product_id': newProduct.id,
+                            'cart_id': id
                         }
                     }
                     )
