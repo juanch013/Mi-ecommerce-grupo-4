@@ -26,7 +26,7 @@ const categoryControler = {
             const newcategory =await db.Category.create({
                 category_name:req.body.name
             });
-            res.status(200).json({
+            res.status(201).json({
                 error:false,
                 msg: "Se creo la categoria",
                 data:newcategory

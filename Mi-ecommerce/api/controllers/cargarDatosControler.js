@@ -1,8 +1,11 @@
 const db = require('../database/models');
 // Carga de jsons
-const users = require('../../api/data.json/user.json');
-const products = require('../../api/data.json/products.json');
-const categories = require('../../api/data.json/categories.json');
+const users = require('../data.json/user.json');
+const products = require('../data.json/products.json');
+const categories = require('../data.json/categories.json');
+const pictures = require('../data.json/pictures.json')
+const cartProducts = require('../data.json/cartProduct.json');
+
 const cargarDatosController = {
 //carga
     carga: async function(req,res){
@@ -36,7 +39,7 @@ const cargarDatosController = {
           category_name: category.category_name
         })
       }
-  
+      //listar productos
       for await (let product of products) {
         await db.Product.upsert({
           price: product.price,
@@ -45,8 +48,24 @@ const cargarDatosController = {
           mostwanted: product.mostwanted,
           category: product.category
         })
-      }
-
+      } 
+      //carga picture
+      for await (let picture of pictures) {
+        await db.Picture.create({
+          picture_url: picture.url,
+          product_id: picture.productId
+        })
+      } 
+      
+      /*
+      //carga productos en carritos
+      for await (let cproduct of cartProducts){
+        await db.CartProduct.create({
+          cart_id: cproduct.cart_id,
+          product_id: cproduct.product_id,
+          quantity: cproduct.quantity
+        })
+      } */
         res.status(200).json({
             error:false,
             msg: "Se cargaron los datos exitosamente",
