@@ -13,17 +13,21 @@ servers:
     description: Entorno Desarrollo
 
 tags:
+  - name: load
+    description: Todos los endpoints de carga de datos
+  - name: login
+    description: Endpoint del login
   - name: users
     description: Todos los endpoints de usuarios
   - name: products
     description: Todos los endpoints de productos
-  - name: login
-    description: Todos los endpoints de productos
-  - name: carito
-    description: Todos los endpoints de carito
   - name: pictures
     description: Todos los endpoints de pictures
-
+  - name: cart
+    description: Todos los endpoints de carrito de usuario
+  - name: category
+    description: Todos los endpoints de categorias
+    
 components:
   securitySchemes:
     bearerAuth:
@@ -32,6 +36,42 @@ components:
       bearerFormat: JWT
 
 paths:
+
+  /cargar:
+    post:
+      tags:
+        - load
+      summary: Carga de datos iniciales de la API, no recibe ningun parametro solo ejecutar.
+
+      responses:
+        "500":
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  msg:
+                    type: string
+                    example: Server Error
+                    
+        "201":
+          description: Data cargada a la base de datos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: false
+                  msg:
+                    type: string
+                    example: Se cargaron los datos exitosamente
+  
   /pictures?product=id:
     get:
       security:
@@ -147,8 +187,10 @@ paths:
               properties:
                 pictureUrl:
                   type: string
-                productDescription:
+                  example: http://www.google.com.uy
+                pictureDescription:
                   type: string
+                  example: ESTA ES UNA IMAGENE MODIFICADA
 
       responses:
         "200":
@@ -162,7 +204,7 @@ paths:
                     type: number
                   picture_url:
                     type: string
-                  dpicture_description:
+                  picture_description:
                     type: string
                   product_id:
                     type: number
@@ -192,7 +234,7 @@ paths:
                     type: string
                   msg:
                     type: string
-                    example: Producto no encontrado
+                    example: Picture not found
 
         "401":
           description: No tiene autorizacion para acceder a este recurso
@@ -206,7 +248,7 @@ paths:
                     example: true
                   msg:
                     type: string
-                    example: No esta autorizado para acceder a este recurso
+                    example: You are not authorized to access this resource
 
         "500":
           description: Server Error
@@ -291,7 +333,7 @@ paths:
                     example: true
                   msg:
                     type: string
-                    example: Producto no encontrado
+                    example: Picture not found
 
         "401":
           description: No tiene autorizacion para acceder a este recurso
@@ -364,7 +406,7 @@ paths:
                     example: true
                   msg:
                     type: string
-                    example: Producto no encontrado
+                    example: Picture not found
 
         "401":
           description: No tiene autorizacion para acceder a este recurso
@@ -379,6 +421,19 @@ paths:
                   msg:
                     type: string
                     example: No esta autorizado para acceder a este recurso
+        
+        "500":
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  msg:
+                    type: string
 
       parameters:
         - name: id
@@ -407,10 +462,13 @@ paths:
               properties:
                 pictureUrl:
                   type: string
-                productDescription:
+                  example: http://www.google.com
+                pictureDescription:
                   type: string
+                  example: Creando una imagen de prueba
                 productId:
                   type: number
+                  example: 1
       responses:
         "201":
           description: Picture creada correctamente
@@ -419,14 +477,13 @@ paths:
               schema:
                 type: object
                 properties:
-                  picture_id:
-                    type: number
                   picture_url:
                     type: string
                   picture_description:
                     type: string
                   product_id:
                     type: number
+              
 
         "400":
           description: Parametro de entrada no es correcto
@@ -779,21 +836,25 @@ paths:
               properties:
                 email:
                   type: string
+                  example: pepe@gmail.com
                 username:
                   type: string
+                  example: pepe
                 password:
                   type: string
+                  example: hola
                 firstname:
                   type: string
+                  example: Pepe
                 lastname:
                   type: string
+                  example: Perez
                 profilepic:
                   type: string
                 role:
                   type: string
-                cart:
-                  type: array
-                  example: []
+                  example: guest
+
       responses:
         "403":
           description: request invalida
@@ -1500,7 +1561,7 @@ paths:
                 description:
                   type: string
                   example: "La mejor Macbook del mercado"
-                category_id:
+                category:
                   type: number
                   example: 2
                 mostwanted:
@@ -1826,16 +1887,22 @@ paths:
               properties:
                 title:
                   type: string
+                  example: Producto X
                 price:
                   type: number
+                  example: 100
                 description:
                   type: string
-                category_id:
+                  example: Producto X
+                category:
                   type: number
+                  example: 1
                 mostwanted:
                   type: boolean
+                  example: false
                 stock:
                   type: number
+                  example: 10
       parameters:
         - name: id
           in: path
@@ -2071,3 +2138,264 @@ paths:
                           type: boolean
                         stock:
                           type: number
+
+  /category:
+    get:
+      security:
+          - bearerAuth: []
+      tags:
+        - category
+      responses:
+        "500":
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  msg:
+                    type: string
+                    example: Server Error
+
+        "200":
+          description: Listado de categorias
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: false
+                  msg:
+                    type: string
+                    example: busqueda exitosa
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        category_id:
+                          type: number
+                        category_name:
+                          type: string  
+    
+    post:
+      security:
+          - bearerAuth: []
+      tags:
+        - category
+      requestBody:
+        description: Categoria a crear
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "categoria 1"
+      responses:
+        "500":
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  msg:
+                    type: string
+                    example: Server Error
+
+        "400":
+          description: Request invalida
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  msg:
+                    type: string
+                    example: Request invalida, Debe enviar el nombre de la categoria
+
+        "201":
+          description: Categoria creada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: false
+                  msg:
+                    type: string
+                    example: Categoria creada correctamente
+                  data:
+                    type: object
+                    properties:
+                      category_id:
+                        type: number
+                      category_name:
+                        type: string
+
+  /category/{id}:
+    put: 
+      security:
+          - bearerAuth: []
+      tags:
+        - category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: id de categoria
+          schema:
+            type: string
+      requestBody:
+        description: Categoria a modificar
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "categoria MODIFICADA"
+      responses:
+        "500":
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  msg:
+                    type: string
+                    example: Server Error
+
+        "400":
+          description: Categoria invalida
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  msg:
+                    type: string
+                    example: Request invalida, Debe ingresar el nombre de la categoria
+
+        "404":
+          description: Categoria no encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  msg:
+                    type: string
+                    example: Category not found
+
+        "200":
+          description: Categoria modificada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: false
+                  msg:
+                    type: string
+                    example: Categoria modificada correctamente
+                  data:
+                    type: object
+                    properties:
+                      category_id:
+                        type: number
+                      category_name:
+                        type: string
+
+    delete:
+      security:
+          - bearerAuth: []
+      tags:
+        - category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: id de categoria
+          schema:
+            type: string
+      responses:
+        "500":
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  msg:
+                    type: string
+                    example: Server Error
+
+        "404":
+          description: Categoria no encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  msg:
+                    type: string
+                    example: Category not found
+
+        "200":
+          description: Categoria eliminada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: false
+                  msg:
+                    type: string
+                    example: Categoria eliminada correctamente
+                  data:
+                    type: object
+                    properties:
+                      category_id:
+                        type: number
+                      category_name:
+                        type: string
+

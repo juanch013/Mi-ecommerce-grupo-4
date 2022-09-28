@@ -48,7 +48,7 @@ const profilepic = joi.string().messages({
 
 const role = joi.string().valid('god', 'admin', 'guest').messages({
 	'string.base': 'Role must be a string',
-	'any.only': 'Role must be either god, user or guest',
+	'any.only': 'Role must be either god, admin or guest',
 });
 
 // const cart = joi.array().items(joi.number().integer().min(1)).messages({
